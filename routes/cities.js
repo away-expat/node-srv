@@ -3,7 +3,7 @@ var router = express.Router();
 var session = require('./databaseConnexion.js');
 
 
-router.get('/getAllCities', function(req, res, next) {
+router.get('/getCities', function(req, res, next) {
   const resultPromise = session.run(
     'Match (c:City) Return c',
   );
@@ -62,6 +62,7 @@ router.get('/getCityByNameWhithLink/:name/:link/:type', function(req, res, next)
   });
 });
 
+/*
 router.get('/get/:name/:link/:type', function(req, res, next) {
   let name = req.params.name;
   let link = req.params.link;
@@ -85,5 +86,6 @@ router.get('/get/:name/:link/:type', function(req, res, next) {
     console.log(error);
   });
 });
+*/
 
 module.exports = router;

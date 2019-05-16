@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
 
-router.get('/getAll', function(req, res, next) {
+router.get('/getTags', function(req, res, next) {
   const resultPromise = session.run(
     'MATCH (n :Tag) RETURN n',
   );

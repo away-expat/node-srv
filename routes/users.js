@@ -2,6 +2,43 @@ var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
 
+router.get('/getUsers', function(req, res, next) {
+  const resultPromise = session.run(
+    'MATCH (n :User) RETURN n',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      returnValue.push(element.get(0));
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.get('/getUser/:id', function(req, res, next) {
+  let id = req.params.id
+  const resultPromise = session.run(
+    'MATCH (n :User) WHERE ID(n) = ' + id + ' RETURN n',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      returnValue.push(element.get(0));
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
 router.post('/createAccount', function(req, res, next) {
   var firstname = req.body.firstname;
   var lastname = req.body.lastname;
@@ -101,23 +138,7 @@ router.delete('/deleteAccount', function(req, res, next) {
   });
 });
 
-router.get('/getAll', function(req, res, next) {
-  const resultPromise = session.run(
-    'MATCH (n :User) RETURN n',
-  );
 
-  resultPromise.then(result => {
-    const records = result.records;
-    var returnValue = [];
-    records.forEach(function(element){
-      returnValue.push(element.get(0));
-    });
-
-    res.send(returnValue);
-  }).catch( error => {
-    console.log(error);
-  });
-});
 
 /*
 MATCH (n { name: 'Andy' })
