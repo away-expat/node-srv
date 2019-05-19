@@ -20,14 +20,17 @@ router.get('/getEvents', function(req, res, next) {
   });
 });
 
+// Simple
 router.get('/getEvent/:id', function(req, res, next) {
     let id = req.params.id
   const resultPromise = session.run(
-    'MATCH (n :Event) WHERE ID(n) = ' + id + ' RETURN n',
+    'Match (e: Event)-[:INSTANCE]->(a:Activity) Where ID(e) = ' + id + '  Return e,a'
   );
 
   resultPromise.then(result => {
     const records = result.records;
+    console.log(records);
+    //console.log(records[0]._fields);
     var returnValue = [];
     records.forEach(function(element){
       returnValue.push(element.get(0));
@@ -39,16 +42,36 @@ router.get('/getEvent/:id', function(req, res, next) {
   });
 });
 
-router.post('/createEvent', function(req, res, next) {
-  let idActivity = req.body.idActivity;
-  let description = req.body.description;
-  let date = req.body.date;
+router.get('/getEventWithDetails/:id', function(req, res, next) {
+    let id = req.params.id
+  const resultPromise = session.run(
+    'Match (e: Event)-[:INSTANCE]->(a:Activity)-[:TYPE]->(t:Tag), (e)<-[:TAKEPART]-(u:User) Where ID(e) = ' + id + '  Return e,a,t,u'
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    console.log(records);
+    //console.log(records[0]._fields);
+    var returnValue = [];
+    records.forEach(function(element){
+      returnValue.push(element.get(0));
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.post('/postParticipateAtEvent', function(req, res, next) {
+  let idEvent = req.body.idEvent;
+  let idUser = req.body.idUser;
 
   const resultPromise = session.run(
-    'CREATE (n :Event {' +
-    'description: "' + description + '", ' +
-    'date: "' + date + '"}) ' +
-    'RETURN n'
+    'MATCH (e:Event),(u:User) ' +
+    'WHERE ID(e) = ' + idEvent + ' AND ID(u) = ' + idUser + ' ' +
+    'CREATE (u)-[r:TAKEPART]->(e) ' +
+    'RETURN u,e,r'
   );
 
   resultPromise.then(result => {
@@ -57,23 +80,71 @@ router.post('/createEvent', function(req, res, next) {
     records.forEach(function(element){
       returnValue.push(element.get(0));
     });
-    let idEvent = returnValue[0].identity.low;
 
-    const resultPromiseForLink = session.run(
-      'MATCH (a:Event),(b:Activity) ' +
-      'WHERE ID(a) = ' + idEvent + ' AND ID(b) = ' + idActivity + ' ' +
-      'CREATE (b)-[r:INSTANCE]->(a),  (a)-[t:OF]->(b)' +
-      'RETURN type(r)'
-    );
+    res.send(records);
 
-    resultPromiseForLink.then(result => {
-      console.log(result);
-      //returnValue.push(element.get(0));
-    }).catch( error => {
-      console.log(error);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.delete('/deleteParticipationAtEvent', function(req, res, next) {
+  let idEvent = req.body.idEvent;
+  let idUser = req.body.idUser;
+
+  const resultPromise = session.run(
+    'MATCH (u:User)-[r:TAKEPART]->(e:Event) ' +
+    'WHERE ID(e) = ' + idEvent + ' AND ID(u) = ' + idUser + ' ' +
+    'DELETE r ' +
+    'RETURN u'
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      returnValue.push(element.get(0));
     });
 
+    res.send(result);
 
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.get('/getEventsByActivity/:id', function(req, res, next) {
+  let id = req.params.id;
+  const resultPromise = session.run(
+    'MATCH (e: Event)-[:INSTANCE]->(a:Activity) WHERE ID(a) = ' + id + ' RETURN e',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      returnValue.push(element.get(0).properties);
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.get('/getAttendeesByEvent/:id', function(req, res, next) {
+  let id = req.params.id;
+  const resultPromise = session.run(
+    'MATCH (u: User)-[:TAKEPART]->(e:Event) WHERE ID(e) = ' + id + ' RETURN u',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    console.log(records);
+    var returnValue = [];
+    records.forEach(function(element){
+      returnValue.push(element.get(0).properties);
+    });
 
     res.send(returnValue);
   }).catch( error => {

@@ -40,5 +40,24 @@ router.get('/getActivity/:id', function(req, res, next) {
   });
 });
 
+router.get('/getActivitiesByCountry/:id', function(req, res, next) {
+  let id = req.params.id;
+  const resultPromise = session.run(
+    'MATCH (c: City)-[:HAS]->(a:Activity) WHERE ID(c) = ' + id + ' RETURN a',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      returnValue.push(element.get(0).properties);
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
 
 module.exports = router;
