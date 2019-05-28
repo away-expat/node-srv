@@ -220,6 +220,202 @@
 
     <!-- ********************************
 
+                  Activity
+
+    ********************************** -->
+    <h2>Activities</h2>
+    <p class="route">Add /activities before</p>
+
+    <div class="title-div" onclick="showDiv('getActivities');">
+      <p class="route"><span class="method">GET</span> /getActivities</p>
+      <p class="description">Get all activities.</p>
+    </div>
+    <div class="definition-div" id="getActivities">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> type</li>
+        <li><span class="type">[string]</span> address</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('getActivity');">
+      <p class="route"><span class="method">GET</span> /getActivity/{id}</p>
+      <p class="description">Get one activities.</p>
+    </div>
+    <div class="definition-div" id="getActivity">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> type</li>
+        <li><span class="type">[string]</span> address</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('getActivities');">
+      <p class="route"><span class="method">GET</span> /getActivitiesByCountry/{id}</p>
+      <p class="description">Get all activities for country.</p>
+    </div>
+    <div class="definition-div" id="getActivities">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> type</li>
+        <li><span class="type">[string]</span> address</li>
+      </ul>
+    </div>
+
+
+
+    <!-- ********************************
+
+                  Events
+
+    ********************************** -->
+    <h2>Events</h2>
+    <p class="route">Add /events before</p>
+
+    <div class="title-div" onclick="showDiv('getEvents');">
+      <p class="route"><span class="method">GET</span> /getEvents</p>
+      <p class="description">Get all events.</p>
+    </div>
+    <div class="definition-div" id="getEvents">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> date</li>
+        <li><span class="type">[string]</span> description</li>
+        <li><span class="type">[string]</span> activityName</li>
+        <li><span class="type">[int]</span> activityId</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('getEvent');">
+      <p class="route"><span class="method">GET</span> /getEvent/{id}</p>
+      <p class="description">Get one event.</p>
+    </div>
+    <div class="definition-div" id="getEvent">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> date</li>
+        <li><span class="type">[string]</span> description</li>
+        <li><span class="type">[string]</span> activityName</li>
+        <li><span class="type">[int]</span> activityId</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('getEventsByActivity');">
+      <p class="route"><span class="method">GET</span> /getEventsByActivity/{id}</p>
+      <p class="description">Get all events for an Activity.</p>
+    </div>
+    <div class="definition-div" id="getEventsByActivity">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+      	<li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> date</li>
+        <li><span class="type">[string]</span> description</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('postEvent');">
+      <p class="route"><span class="method">POST</span> /postEvent</p>
+      <p class="description">Create Event.</p>
+    </div>
+    <div class="definition-div" id="postEvent">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> idActivity</li>
+        <li><span class="type">[int]</span> idUser</li>
+        <li><span class="type">[string]</span> date</li>
+        <li><span class="type">[string]</span> description</li>
+      </ul>
+      <h3>Return :</h3>
+      Event created
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> date</li>
+        <li><span class="type">[string]</span> description</li>
+        <li><span class="type">[string]</span> activityName</li>
+        <li><span class="type">[int]</span> activityId</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('postParticipateAtEvent');">
+      <p class="route"><span class="method">POST</span> /postParticipateAtEvent</p>
+      <p class="description">Participate to Event.</p>
+    </div>
+    <div class="definition-div" id="postParticipateAtEvent">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> idEvent</li>
+        <li><span class="type">[int]</span> idUser</li>
+      </ul>
+      <h3>Return :</h3>
+      Event choiced
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> date</li>
+        <li><span class="type">[string]</span> description</li>
+        <li><span class="type">[string]</span> activityName</li>
+        <li><span class="type">[int]</span> activityId</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('deleteParticipationAtEvent');">
+      <p class="route"><span class="method">DELETE</span> /deleteParticipationAtEvent</p>
+      <p class="description">Unparticipate to Event.</p>
+    </div>
+    <div class="definition-div" id="deleteParticipationAtEvent">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> idEvent</li>
+        <li><span class="type">[int]</span> idUser</li>
+      </ul>
+      <h3>Return :</h3>
+      Event choiced
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> date</li>
+        <li><span class="type">[string]</span> description</li>
+        <li><span class="type">[string]</span> activityName</li>
+        <li><span class="type">[int]</span> activityId</li>
+      </ul>
+    </div>
+
+    <!-- ********************************
+
                   Tag
 
     ********************************** -->
@@ -269,7 +465,7 @@
 
     <div class="title-div" onclick="showDiv('getFollowByUser');">
       <p class="route"><span class="method">GET</span> /getFollowByUser/{id}</p>
-      <p class="description">Get all user follow.</p>
+      <p class="description">Get all users follow.</p>
     </div>
     <div class="definition-div" id="getFollowByUser">
       <h3>Parameters :</h3>

@@ -12,7 +12,14 @@ router.get('/getActivities', function(req, res, next) {
     const records = result.records;
     var returnValue = [];
     records.forEach(function(element){
-      returnValue.push(element.get(0).properties);
+      var el = element.get(0);
+      var activity = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "type" : el.properties.type,
+        "address" : el.properties.address
+      }
+      returnValue.push(activity);
     });
 
     res.send(returnValue);
@@ -29,9 +36,16 @@ router.get('/getActivity/:id', function(req, res, next) {
 
   resultPromise.then(result => {
     const records = result.records;
-    var returnValue = [];
+    var returnValue;
     records.forEach(function(element){
-      returnValue.push(element.get(0).properties);
+      var el = element.get(0);
+      var activity = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "type" : el.properties.type,
+        "address" : el.properties.address
+      }
+      returnValue = activity;
     });
 
     res.send(returnValue);
@@ -50,7 +64,14 @@ router.get('/getActivitiesByCountry/:id', function(req, res, next) {
     const records = result.records;
     var returnValue = [];
     records.forEach(function(element){
-      returnValue.push(element.get(0).properties);
+      var el = element.get(0);
+      var activity = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "type" : el.properties.type,
+        "address" : el.properties.address
+      }
+      returnValue.push(activity);
     });
 
     res.send(returnValue);
