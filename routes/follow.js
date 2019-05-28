@@ -10,16 +10,24 @@ router.get('/getFollowByUser/:id', function(req, res, next) {
   let id = req.params.id;
 
   const resultPromise = session.run(
-    'MATCH (u:User) -[l:FOLLOW]-> (otherNode:User) WHERE ID(u) = ' + id + ' RETURN u,l,otherNode',
+    'MATCH (u:User) -[l:FOLLOW]-> (otherNode:User) WHERE ID(u) = ' + id + ' RETURN otherNode',
   );
 
   resultPromise.then(result => {
-    const sizeOfNodeLinked = result.records.length;
+    const records = result.records;
     var returnValue = [];
-    returnValue.push(result.records[0]._fields[0].properties);
-    for(var i = 0; i < sizeOfNodeLinked; i++){
-      returnValue.push(result.records[i]._fields[2].properties);
-    }
+    records.forEach(function(element){
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "age" : el.properties.age.low,
+      }
+      returnValue.push(user);
+    });
 
     res.send(returnValue);
   }).catch( error => {
@@ -35,16 +43,24 @@ router.post('/postFollowUser', function(req, res, next) {
     'MATCH (u:User),(f:User) ' +
     'WHERE ID(u) = ' + id + ' AND ID(f) = ' + idfollow + ' ' +
     'CREATE (u)-[l:FOLLOW]->(f)' +
-    'RETURN u,f,l'
+    'RETURN f'
   );
 
   resultPromise.then(result => {
-    const sizeOfNodeLinked = result.records.length;
-    var returnValue = [];
-    returnValue.push(result.records[0]._fields[0].properties);
-    for(var i = 0; i < sizeOfNodeLinked; i++){
-      returnValue.push(result.records[i]._fields[2].properties);
-    }
+    const records = result.records;
+    var returnValue;
+    records.forEach(function(element){
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "age" : el.properties.age.low,
+      }
+      returnValue = user;
+    });
 
     res.send(returnValue);
   }).catch( error => {
@@ -59,11 +75,27 @@ router.delete('/deleteFollowUser/', function(req, res, next) {
   const resultPromise = session.run(
     'MATCH (u:User)-[r:FOLLOW]->(f:User) ' +
     'WHERE ID(u) = ' + id + ' AND ID(f) = ' + idfollow + ' ' +
-    'DELETE r'
+    'DELETE r ' +
+    'RETURN f'
   );
 
   resultPromise.then(result => {
-    res.send(result);
+    const records = result.records;
+    var returnValue;
+    records.forEach(function(element){
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "age" : el.properties.age.low,
+      }
+      returnValue = user;
+    });
+
+    res.send(returnValue);
   }).catch( error => {
     console.log(error);
   });

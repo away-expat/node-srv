@@ -115,7 +115,7 @@
     <div class="definition-div" id="getUser">
       <h3>Parameters :</h3>
       <ul class="list-param">
-        <li><span class="type">[int]</span> id</li>
+        <li><span class="type"></span> none</li>
       </ul>
       <h3>Return :</h3>
       <ul class="list-param">
@@ -218,7 +218,119 @@
       </ul>
     </div>
 
+    <!-- ********************************
 
+                  Tag
+
+    ********************************** -->
+    <h2>Tag</h2>
+    <p class="route">Add /tags before</p>
+
+    <div class="title-div" onclick="showDiv('getTags');">
+      <p class="route"><span class="method">GET</span> /getTags</p>
+      <p class="description">Get all tags.</p>
+    </div>
+    <div class="definition-div" id="getTags">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('createTag');">
+      <p class="route"><span class="method">POST</span> /createTag</p>
+      <p class="description">Create a new tag.</p>
+    </div>
+    <div class="definition-div" id="createTag">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> name</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+      </ul>
+    </div>
+
+    <!-- ********************************
+
+                  Follow
+
+    ********************************** -->
+    <h2>Follow</h2>
+    <p class="route">Add /follow before</p>
+
+    <div class="title-div" onclick="showDiv('getFollowByUser');">
+      <p class="route"><span class="method">GET</span> /getFollowByUser/{id}</p>
+      <p class="description">Get all user follow.</p>
+    </div>
+    <div class="definition-div" id="getFollowByUser">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('postFollowUser');">
+      <p class="route"><span class="method">POST</span> /postFollowUser</p>
+      <p class="description">Follow one user.</p>
+    </div>
+    <div class="definition-div" id="postFollowUser">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[int]</span> idfollow</li>
+      </ul>
+      <h3>Return :</h3>
+      User Followed
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('deleteFollowUser');">
+      <p class="route"><span class="method">DELETE</span> /deleteFollowUser</p>
+      <p class="description">Unfollow one user.</p>
+    </div>
+    <div class="definition-div" id="deleteFollowUser">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[int]</span> idfollow</li>
+      </ul>
+      <h3>Return :</h3>
+      User Unfollowed
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+    </div>
 
 
 

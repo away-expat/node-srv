@@ -11,7 +11,12 @@ router.get('/getTags', function(req, res, next) {
     const records = result.records;
     var returnValue = [];
     records.forEach(function(element){
-      returnValue.push(element.get(0));
+      var el = element.get(0);
+      var tag = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+      }
+      returnValue.push(tag);
     });
 
     res.send(returnValue);
@@ -30,9 +35,14 @@ router.post('/createTag', function(req, res, next) {
 
   resultPromise.then(result => {
     const records = result.records;
-    var returnValue = [];
+    var returnValue;
     records.forEach(function(element){
-      returnValue.push(element.get(0));
+      var el = element.get(0);
+      var tag = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+      }
+      returnValue = tag;
     });
 
     res.send(returnValue);
