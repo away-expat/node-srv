@@ -1,0 +1,236 @@
+
+<html>
+  <head>
+    <title>API documentation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
+        font-weight: 400;
+        font-size: 16px;
+        padding: 15px 30px;
+        color: #333;
+      }
+
+      .center-text {
+        text-align: center;
+      }
+      h2 {
+        font-size: 35px;
+        font-weight: 100;
+        margin-bottom: 30px;
+        color:#4caf50;
+      }
+
+      h3 {
+        font-size: 17px;
+        font-weight: 100;
+        margin-bottom: 10px;
+        color:#4caf50;
+      }
+
+      .type {
+        font-style: italic;
+        color: #f06e17;
+      }
+
+      .description {
+        font-style: italic;
+        font-size: 15px;
+        margin-bottom: 20px;
+      }
+
+      .route {
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .method {
+        font-weight: bold;
+        margin-right: 10px;
+        font-size: 19px;
+        color: #f06e17;
+      }
+
+      .list-param {
+        margin-left: 50px;
+        margin-bottom: 20px;
+        font-size: 15px;
+      }
+
+      .definition-div {
+        margin-bottom: 50px;
+        display:none;
+      }
+
+      .title-div {
+        cursor: pointer;
+      }
+
+      .optional {
+        font-weight: bold;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ********************************
+
+                  Users
+
+    ********************************** -->
+    <h2>Users</h2>
+    <p class="route">Add /users before</p>
+
+    <div class="title-div" onclick="showDiv('getUsers');">
+      <p class="route"><span class="method">GET</span> /getUsers</p>
+      <p class="description">Get all users.</p>
+    </div>
+    <div class="definition-div" id="getUsers">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('getUser');">
+      <p class="route"><span class="method">GET</span> /getUser/{id}</p>
+      <p class="description">Get user by id.</p>
+    </div>
+    <div class="definition-div" id="getUser">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('createAccount');">
+      <p class="route"><span class="method">POST</span> /createAccount</p>
+      <p class="description">Create a new user.</p>
+    </div>
+    <div class="definition-div" id="createAccount">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> password</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('updateAccount');">
+      <p class="route"><span class="method">PUT</span> /updateAccount</p>
+      <p class="description">Update user by id.</p>
+    </div>
+    <div class="definition-div" id="updateAccount">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('updateUserCountry');">
+      <p class="route"><span class="method">PUT</span> /updateUserCountry</p>
+      <p class="description">Update country of user.</p>
+    </div>
+    <div class="definition-div" id="updateUserCountry">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+		<li><span class="type">[string]</span> country</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('deleteAccount');">
+      <p class="route"><span class="method">DELETE</span> /deleteAccount</p>
+      <p class="description">Delete user.</p>
+    </div>
+    <div class="definition-div" id="deleteAccount">
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> age</li>
+      </ul>
+    </div>
+
+
+
+
+
+    <script>
+      function showDiv(divId) {
+        div = document.getElementById(divId);
+        if(div.style.display == "block") {
+          div.style.display = "none";
+        } else {
+          div.style.display = "block";
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -11,7 +11,16 @@ router.get('/getUsers', function(req, res, next) {
     const records = result.records;
     var returnValue = [];
     records.forEach(function(element){
-      returnValue.push(element.get(0));
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "age" : el.properties.age.low,
+      }
+      returnValue.push(user);
     });
 
     res.send(returnValue);
@@ -28,9 +37,18 @@ router.get('/getUser/:id', function(req, res, next) {
 
   resultPromise.then(result => {
     const records = result.records;
-    var returnValue = [];
+    var returnValue;
     records.forEach(function(element){
-      returnValue.push(element.get(0));
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "age" : el.properties.age.low,
+      }
+      returnValue = user;
     });
 
     res.send(returnValue);
@@ -45,12 +63,14 @@ router.post('/createAccount', function(req, res, next) {
   var age = req.body.age;
   var mail = req.body.mail;
   var country =  req.body.country;
+  var password = req.body.password;
 
   const resultPromise = session.run(
     'CREATE (n :User {firstname:"' + firstname + '", ' +
     'lastname:"' + lastname + '", ' +
     'age: ' + age + ', ' +
     'mail:"' + mail + '", ' +
+    'password:"' + password + '", ' +
     'country:"' + country + '"})'+
     'RETURN n',
   );
@@ -59,7 +79,16 @@ router.post('/createAccount', function(req, res, next) {
     const records = result.records;
     var returnValue = [];
     records.forEach(function(element){
-      returnValue.push(element.get(0));
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "age" : el.properties.age.low,
+      }
+      returnValue = user;
     });
 
     res.send(returnValue);
@@ -74,6 +103,7 @@ router.put('/updateAccount', function(req, res, next) {
   var lastname = req.body.lastname;
   var age = req.body.age;
   var mail = req.body.mail;
+  var country = req.body.country;
 
   const resultPromise = session.run(
     'MATCH (n :User)' +
@@ -81,6 +111,7 @@ router.put('/updateAccount', function(req, res, next) {
     'SET n.firstname = "' + firstname + '", ' +
     'n.lastname = "' + lastname + '", ' +
     'n.age = ' + age + ', ' +
+    'n.country = ' + country + ', ' +
     'n.mail = "' + mail +  '"' +
     'RETURN n',
   );
@@ -110,7 +141,16 @@ router.put('/updateUserCountry', function(req, res, next) {
     const records = result.records;
     var returnValue = [];
     records.forEach(function(element){
-      returnValue.push(element.get(0));
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "age" : el.properties.age.low,
+      }
+      returnValue = user;
     });
 
     res.send(returnValue);
@@ -129,7 +169,16 @@ router.delete('/deleteAccount', function(req, res, next) {
     const records = result.records;
     var returnValue = [];
     records.forEach(function(element){
-      returnValue.push(element.get(0));
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "age" : el.properties.age.low,
+      }
+      returnValue = user;
     });
 
     res.send(returnValue);
