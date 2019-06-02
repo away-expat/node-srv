@@ -3,7 +3,7 @@ var router = express.Router();
 var session = require('./databaseConnexion.js');
 
 
-router.get('/getActivities', function(req, res, next) {
+router.get('/', function(req, res, next) {
   const resultPromise = session.run(
     'Match (a:Activity) Return a',
   );
@@ -28,7 +28,7 @@ router.get('/getActivities', function(req, res, next) {
   });
 });
 
-router.get('/getActivity/:id', function(req, res, next) {
+router.get('/:id', function(req, res, next) {
   let id = req.params.id;
   const resultPromise = session.run(
     'MATCH (a:Activity) WHERE ID(a) = ' + id + ' RETURN a',

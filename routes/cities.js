@@ -3,7 +3,7 @@ var router = express.Router();
 var session = require('./databaseConnexion.js');
 
 
-router.get('/getCities', function(req, res, next) {
+router.get('/', function(req, res, next) {
   const resultPromise = session.run(
     'Match (c:City) Return c',
   );
@@ -12,7 +12,39 @@ router.get('/getCities', function(req, res, next) {
     const records = result.records;
     var returnValue = [];
     records.forEach(function(element){
-      returnValue.push(element.get(0).properties);
+      var el = element.get(0);
+      var city = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "country" : el.properties.country
+      }
+      returnValue.push(city);
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.get('/:id', function(req, res, next) {
+  let id = req.params.id;
+  const resultPromise = session.run(
+    'Match (c:City) Where ID(c) = ' + id + ' Return c',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue;
+    records.forEach(function(element){
+      var el = element.get(0);
+      var city = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "country" : el.properties.country
+      }
+
+      returnValue = city;
     });
 
     res.send(returnValue);
@@ -38,13 +70,14 @@ router.get('/getCityByName/:name', function(req, res, next) {
   });
 });
 
-router.get('/getCityByNameWhithLink/:name/:link/:type', function(req, res, next) {
+/*
+router.get('/getCityByNameAndTag/:name/:idTag', function(req, res, next) {
   let name = req.params.name;
-  let link = req.params.link;
-  let type = req.params.type;
+  let idTag = req.params.idTag;
+
 
   const resultPromise = session.run(
-    'Match (c:City {name:"' + name + '"})-[l:' + link + ' {type: "' + type + '"}]->(otherNode) Return c,l,otherNode',
+    'Match (c:City {name:"' + name + '"})-[l:HAS]->(otherNode) Return c,l,otherNode',
   );
 
   resultPromise.then(result => {
@@ -62,7 +95,6 @@ router.get('/getCityByNameWhithLink/:name/:link/:type', function(req, res, next)
   });
 });
 
-/*
 router.get('/get/:name/:link/:type', function(req, res, next) {
   let name = req.params.name;
   let link = req.params.link;

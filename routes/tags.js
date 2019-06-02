@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
 
-router.get('/getTags', function(req, res, next) {
+router.get('/', function(req, res, next) {
   const resultPromise = session.run(
     'MATCH (n :Tag) RETURN n',
   );
@@ -25,7 +25,7 @@ router.get('/getTags', function(req, res, next) {
   });
 });
 
-router.post('/createTag', function(req, res, next) {
+router.post('/', function(req, res, next) {
   let name = req.body.name;
   console.log(name);
 

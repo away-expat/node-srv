@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
 
-router.get('/getUsers', function(req, res, next) {
+router.get('/', function(req, res, next) {
   const resultPromise = session.run(
     'MATCH (n :User) RETURN n',
   );
@@ -29,7 +29,7 @@ router.get('/getUsers', function(req, res, next) {
   });
 });
 
-router.get('/getUser/:id', function(req, res, next) {
+router.get('/:id', function(req, res, next) {
   let id = req.params.id
   const resultPromise = session.run(
     'MATCH (n :User) WHERE ID(n) = ' + id + ' RETURN n',
@@ -57,7 +57,7 @@ router.get('/getUser/:id', function(req, res, next) {
   });
 });
 
-router.post('/createAccount', function(req, res, next) {
+router.post('/', function(req, res, next) {
   var firstname = req.body.firstname;
   var lastname = req.body.lastname;
   var age = req.body.age;
@@ -97,7 +97,7 @@ router.post('/createAccount', function(req, res, next) {
   });
 });
 
-router.put('/updateAccount', function(req, res, next) {
+router.put('/', function(req, res, next) {
   var id = req.body.id;
   var firstname = req.body.firstname;
   var lastname = req.body.lastname;
@@ -121,6 +121,34 @@ router.put('/updateAccount', function(req, res, next) {
     var returnValue = [];
     records.forEach(function(element){
       returnValue.push(element.get(0));
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.delete('/', function(req, res, next) {
+  var id = req.body.id;
+  const resultPromise = session.run(
+    'MATCH (n :User) WHERE ID(n) = ' + id + ' SET n.firstname = "", n.lastname = "", n.age = 0, n.country = "", n.mail = "" RETURN n'
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "age" : el.properties.age.low,
+      }
+      returnValue = user;
     });
 
     res.send(returnValue);
@@ -158,35 +186,6 @@ router.put('/updateUserCountry', function(req, res, next) {
     console.log(error);
   });
 });
-
-router.delete('/deleteAccount', function(req, res, next) {
-  var id = req.body.id;
-  const resultPromise = session.run(
-    'MATCH (n :User) WHERE ID(n) = ' + id + ' SET n.firstname = "", n.lastname = "", n.age = 0, n.country = "", n.mail = "" RETURN n'
-  );
-
-  resultPromise.then(result => {
-    const records = result.records;
-    var returnValue = [];
-    records.forEach(function(element){
-      var el = element.get(0);
-      var user = {
-        "id" : el.identity.low,
-        "firstname" : el.properties.firstname,
-        "lastname" : el.properties.lastname,
-        "mail" : el.properties.mail,
-        "country" : el.properties.country,
-        "age" : el.properties.age.low,
-      }
-      returnValue = user;
-    });
-
-    res.send(returnValue);
-  }).catch( error => {
-    console.log(error);
-  });
-});
-
 
 
 /*

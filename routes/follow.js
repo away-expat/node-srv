@@ -2,11 +2,7 @@ var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
 
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
-
-router.get('/getFollowByUser/:id', function(req, res, next) {
+router.get('/:id', function(req, res, next) {
   let id = req.params.id;
 
   const resultPromise = session.run(
@@ -35,7 +31,7 @@ router.get('/getFollowByUser/:id', function(req, res, next) {
   });
 });
 
-router.post('/postFollowUser', function(req, res, next) {
+router.post('/', function(req, res, next) {
   let id = req.body.id;
   let idfollow = req.body.idfollow;
 
@@ -68,7 +64,7 @@ router.post('/postFollowUser', function(req, res, next) {
   });
 });
 
-router.delete('/deleteFollowUser/', function(req, res, next) {
+router.delete('/', function(req, res, next) {
   let id = req.body.id;
   let idfollow = req.body.idfollow;
 
