@@ -157,12 +157,14 @@ router.delete('/', function(req, res, next) {
   });
 });
 
-router.put('/updateUserCountry', function(req, res, next) {
-  var country = req.body.country;
+router.put('/updateUserCity', function(req, res, next) {
+  var idCity = req.body.idCity;
   var id = req.body.id;
 
   const resultPromise = session.run(
-    'MATCH (n :User) WHERE ID(n) = ' + id + ' SET n.country = "' + country + '" RETURN n',
+    'MATCH (n :User)-[l:FROM]->(c),(newCity:City) WHERE ID(n) = ' + id + ' AND ID(newCity) = ' + idCity + ' DELETE l '+
+    'CREATE (n)-[:FROM]->(newCity) ' +
+    'RETURN newCity',
   );
 
   resultPromise.then(result => {
@@ -170,15 +172,15 @@ router.put('/updateUserCountry', function(req, res, next) {
     var returnValue = [];
     records.forEach(function(element){
       var el = element.get(0);
-      var user = {
+      var city = {
         "id" : el.identity.low,
-        "firstname" : el.properties.firstname,
-        "lastname" : el.properties.lastname,
-        "mail" : el.properties.mail,
+        "name" : el.properties.name,
         "country" : el.properties.country,
-        "age" : el.properties.age.low,
+        "place_id" : el.properties.place_id,
+        "location" : el.properties.location
       }
-      returnValue = user;
+
+      returnValue = city;
     });
 
     res.send(returnValue);

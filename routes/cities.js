@@ -16,7 +16,9 @@ router.get('/', function(req, res, next) {
       var city = {
         "id" : el.identity.low,
         "name" : el.properties.name,
-        "country" : el.properties.country
+        "country" : el.properties.country,
+        "place_id" : el.properties.place_id,
+        "location" : el.properties.location
       }
       returnValue.push(city);
     });
@@ -41,9 +43,38 @@ router.get('/:id', function(req, res, next) {
       var city = {
         "id" : el.identity.low,
         "name" : el.properties.name,
-        "country" : el.properties.country
+        "country" : el.properties.country,
+        "place_id" : el.properties.place_id,
+        "location" : el.properties.location
       }
 
+      returnValue = city;
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.get('/placeId/:id', function(req, res, next) {
+  let id = req.params.id;
+  const resultPromise = session.run(
+    'Match (c:City {place_id : "' + id + '" }) Return c',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue;
+    records.forEach((element) => {
+      var el = element.get(0);
+      var city = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "country" : el.properties.country,
+        "place_id" : el.properties.place_id,
+        "location" : el.properties.location
+      }
       returnValue = city;
     });
 
@@ -70,6 +101,43 @@ router.get('/getCityByName/:name', function(req, res, next) {
   });
 });
 
+router.post('/', function(req, res, next) {
+  let name = req.body.name;
+  let country = req.body.country;
+  let place_id = req.body.place_id;
+  let location = req.body.location;
+
+  const resultPromise = session.run(
+    'Create (c:City {' +
+    'name: "' + name + '", ' +
+    'country: "' + country + '", ' +
+    'place_id: "' + place_id + '", ' +
+    'location: "' + location + '" ' +
+    '}) Return c',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue;
+    records.forEach(function(element){
+      var el = element.get(0);
+      var city = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "country" : el.properties.country,
+        "place_id" : el.properties.place_id,
+        "location" : el.properties.location,
+      }
+
+      returnValue = city;
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    res.status(500).send(error);
+    console.log(error);
+  });
+});
 /*
 router.get('/getCityByNameAndTag/:name/:idTag', function(req, res, next) {
   let name = req.params.name;
