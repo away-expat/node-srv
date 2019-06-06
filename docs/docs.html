@@ -88,7 +88,7 @@
     <p class="route">Add /users before</p>
 
     <div class="title-div" onclick="showDiv('getUsers');">
-      <p class="route"><span class="method">GET</span> /getUsers</p>
+      <p class="route"><span class="method">GET</span> /</p>
       <p class="description">Get all users.</p>
     </div>
     <div class="definition-div" id="getUsers">
@@ -103,13 +103,12 @@
         <li><span class="type">[string]</span> firstname</li>
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
-        <li><span class="type">[string]</span> country</li>
         <li><span class="type">[int]</span> age</li>
       </ul>
     </div>
 
     <div class="title-div" onclick="showDiv('getUser');">
-      <p class="route"><span class="method">GET</span> /getUser/{id}</p>
+      <p class="route"><span class="method">GET</span> /{id}</p>
       <p class="description">Get user by id.</p>
     </div>
     <div class="definition-div" id="getUser">
@@ -123,13 +122,12 @@
         <li><span class="type">[string]</span> firstname</li>
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
-        <li><span class="type">[string]</span> country</li>
         <li><span class="type">[int]</span> age</li>
       </ul>
     </div>
 
     <div class="title-div" onclick="showDiv('createAccount');">
-      <p class="route"><span class="method">POST</span> /createAccount</p>
+      <p class="route"><span class="method">POST</span> /</p>
       <p class="description">Create a new user.</p>
     </div>
     <div class="definition-div" id="createAccount">
@@ -138,7 +136,7 @@
         <li><span class="type">[string]</span> firstname</li>
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
-        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> idCountry</li>
         <li><span class="type">[int]</span> age</li>
         <li><span class="type">[int]</span> password</li>
       </ul>

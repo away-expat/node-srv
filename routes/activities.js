@@ -1,145 +1,95 @@
 var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
+var googleApi = require('./google_api.js');
+var neo4jCity = require('../neo4j_func/cities.js');
+var neo4jActivity = require('../neo4j_func/activity.js');
+var neo4jTag = require('../neo4j_func/tag.js');
 
-const googleMaps = require('@google/maps').createClient({
-  key: "AIzaSyB17-DLIRJDd2fZetdqBPByqyQn2n5F7KM",
-  Promise: Promise
-});
-
-
-
-function getNextPage(token, googleMapsClient) {
-    googleMapsClient.placesNearby({
-        pagetoken: token
-    })
-    .asPromise()
-    .then((res) =>{
-      return res;
-    })
-    .catch((err) => {
-      console.log(err);
-    });;
-}
-
-function createActivity(name, place_id, ){
-  const resultPromise = session.run(
-    'CREATE (a:Activity {'+
-
-
-    '}) RETURN a',
-  );
-
-  resultPromise.then(result => {
-    const records = result.records;
-    var returnValue;
-    records.forEach(function(element){
-      var el = element.get(0);
-      var activity = {
-        "id" : el.identity.low,
-        "name" : el.properties.name,
-        "type" : el.properties.type,
-        "address" : el.properties.address
-      }
-      returnValue = activity;
-    });
-
-    res.send(returnValue);
-  }).catch( error => {
-    console.log(error);
-  });
-}
-
-router.get('/testGoogle/:city', function(req, res, next) {
+router.get('/googleByCity/:city/:option?', function(req, res, next) {
   var city = req.params.city;
+  var option = req.params.option;
   var returnValue = [];
 
-  googleMaps.geocode({
-      components: {
-        locality: city
-      },
-    })
-    .asPromise()
-    .then((response) => {
-      if(response.json.status = 'OK'){
-        var placeIdCity = response.json.results[0].place_id;
-        var city;
-        /*
-        if( .length == 1){
-          city = req;
-        } else {
-          let sizeAdressCity = response.json.results[0].address_components.length;
-          for(i = 0; i < sizeAdressCity; i++){
-            let decomposedAdressCity = response.json.results[0].address_components[i].types.length;
-            var nameCity = response.json.results[0].address_components[0].long_name;
+  if (!option)
+    option = '';
 
-            for(j = 0; j < decomposedAdressCity; j++){
-              if(response.json.results[0].address_components[i].types[j] == 'country')
-                var countryCity = response.json.results[0].address_components[i].long_name;
+  googleApi.getByName(city)
+  .then(result => {
+    var cityFromGoogle = result;
+
+    neo4jCity.createIfDoNotExiste(cityFromGoogle)
+    .then(reslt => {
+
+      googleApi.getNear(reslt.location, option)
+      .then(resultActivity => {
+
+        neo4jActivity.createIfDoNotExiste(resultActivity, reslt.id)
+        .then(activityArray => {
+
+          var tagArray = [];
+          activityArray.forEach(activity => {
+            if(activity.type){
+              activity.type = activity.type.split(',');
+              activity.type.forEach(tag => {
+                if(tagArray.indexOf(tag) == -1)
+                  tagArray.push(tag);
+              })
             }
-          }
-          var locationCity = [response.json.results[0].geometry.location.lat,response.json.results[0].geometry.location.lng];
-          city = req;
-        }
+          })
+          neo4jTag.createMultyTag(tagArray)
+          .then(tagResult => {
+            activityArray.forEach(activity => {
+              if(activity.type)
+                tagResult.forEach(tag => {
+                  if(activity.type.indexOf(tag.name) != -1){
 
-        console.log(city);
+                    neo4jTag.createLink(activity.id, tag.id)
+                    .catch( error => {
+                      console.log(error);
+                      reject(error);
+                    });
+                  }
+                })
+            })
 
-        */
-
-        // get nearplaces
-        // if existe add obj to returnValue
-        // else
-        // get detail nearplaces
-        // then add obj to returnValue
-
-        // parcourt of Pages
-
-
-      }
+          })
 
 
-      /*
-      var nextPageToken = response.json.next_page_token;
-      getNextPage(nextPageToken, googleMapsClient);
-      googleMaps.place({
-        placeid: 'ChIJc6EceWquEmsRmBVAjzjXM-g',
-        //language: 'fr'
+          res.send(activityArray);
+
+        }).catch(error => {
+          res.status(500).send(error);
+          console.log(error);
+        });
       })
-      .asPromise()
-      .then(function(res) {
-        console.log(res.json);
-        console.log(res.json.result.photos);
-      }).catch((err) => {
-        console.log(err);
+      .catch(error => {
+        res.status(500).send(error);
+        console.log(error);
       });
-*/
-      /*
-      responseLenght = response.json.results.length;
-      //console.log(responseLenght);
-      for(i = 0; i < responseLenght; i++){
-        var place = response.json.results[i];
-        if(place.types[0]!= 'locality');
-        var element = {
-          "name" : place.name,
-          "place_id" : place.place_id,
-          "rating" : place.rating,
-          "vicinity" : place.vicinity,
-          "types" : place.types,
-          "location" : place.geometry.location
-        }
-        console.log(element);
-      }
-
-      */
-
-    })
-    .catch((err) => {
-      console.log(err);
+    }).catch(error => {
+      res.status(500).send(error);
+      console.log(error);
     });
+  }).catch(error => {
+    res.status(500).send(error);
+    console.log(error);
+  });
 
+});
 
+router.get('/testGoogleDetail/:tkn', function(req, res, next) {
+  var tkn = req.params.tkn;
 
-  res.send(returnValue);
+  googleApi.getDetail(tkn)
+  .then(result => {
+    console.log(result);
+    res.send(result)
+  }).catch(error => {
+    res.status(500).send(error);
+    console.log(error);
+  });
+
 });
 
 router.get('/', function(req, res, next) {
