@@ -8,7 +8,8 @@ module.exports = {
     return new Promise((resolve, reject) => {
       googleMaps.geocode({
           components: {
-            locality: city
+            locality: city,
+            type: 'locality'
           },
         })
         .asPromise()
@@ -51,6 +52,16 @@ module.exports = {
       .asPromise()
       .then(function(detailElement) {
         if(detailElement.json.status == 'OK'){
+          var address_components = detailElement.json.result.address_components;
+          var city;
+          var country;
+          address_components.forEach(add => {
+            if(add.types[0]=='locality')
+              city = add.long_name;
+            if(add.types[0]=='country')
+              country = add.long_name;
+          })
+
           var address = detailElement.json.result.formatted_address;
           var name = detailElement.json.result.name;
           var place_id = detailElement.json.result.place_id;
@@ -76,7 +87,9 @@ module.exports = {
             "rating" : rating,
             "types" : types,
             "url" : url,
-            "photos" : photos
+            "photos" : photos,
+            "city" : city,
+            "country" : country
           }
 
           resolve(activity);

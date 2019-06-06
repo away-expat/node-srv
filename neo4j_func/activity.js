@@ -74,6 +74,47 @@ module.exports = {
         console.log(error);
         reject(error);
       });
+
+    })
+  },
+  createWithoutCity: function (adress, name, place_id, rating = -1, types, url, photos) {
+    return new Promise((resolve, reject) => {
+      const resultPromise = session.run(
+        'Create (a:Activity {' +
+        'address: "' + adress + '", ' +
+        'name: "' + name + '", ' +
+        'place_id: "' + place_id + '", ' +
+        'rating: ' + rating + ', ' +
+        'url: "' + url + '", ' +
+        'type : "' + types + '", ' +
+        'photos: "' + photos + '" ' +
+        '}) Return a',
+      );
+
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue;
+        records.forEach(function(element){
+          var el = element.get(0);
+          var activity = {
+            "id" : el.identity.low,
+            "name" : el.properties.name,
+            "address" : el.properties.address,
+            "place_id" : el.properties.place_id,
+            "rating" : el.properties.rating,
+            "url" : el.properties.url,
+            "photos" : el.properties.photos,
+            "type" : el.properties.type
+          }
+          returnValue = activity;
+        });
+
+        resolve(returnValue);
+      }).catch( error => {
+        console.log(error);
+        reject(error);
+      });
+
     })
   },
   createIfDoNotExiste: function (activities, idCity) {
@@ -92,16 +133,33 @@ module.exports = {
           else {
             googleApi.getDetail(el)
             .then(activityDetail => {
-              this.create(activityDetail.address, activityDetail.name, activityDetail.place_id, activityDetail.rating, activityDetail.types, activityDetail.url, activityDetail.photos, idCity)
-              .then(newActivity => {
-                returnValue.push(newActivity);
-                if (returnValue.length == sizeInput)
-                   resolve(returnValue);
-              })
-              .catch(error => {
-                console.log(error);
-                reject(error);
-              });
+              if(idCity != -1){
+                this.create(activityDetail.address, activityDetail.name, activityDetail.place_id, activityDetail.rating, activityDetail.types, activityDetail.url, activityDetail.photos, idCity)
+                .then(newActivity => {
+                  returnValue.push(newActivity);
+                  if (returnValue.length == sizeInput)
+                     resolve(returnValue);
+                })
+                .catch(error => {
+                  console.log(error);
+                  reject(error);
+                });
+              } else {
+                var tmpNewCity = activityDetail.city + " " + activityDetail.country;
+
+                this.createWithoutCity(activityDetail.address, activityDetail.name, activityDetail.place_id, activityDetail.rating, activityDetail.types, activityDetail.url, activityDetail.photos)
+                .then(newActivity => {
+                  newActivity.city = tmpNewCity;
+                  returnValue.push(newActivity);
+                  if (returnValue.length == sizeInput)
+                     resolve(returnValue);
+                })
+                .catch(error => {
+                  console.log(error);
+                  reject(error);
+                });
+              }
+
 
             })
             .catch(error => {

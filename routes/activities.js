@@ -78,12 +78,112 @@ router.get('/googleByCity/:city/:option?', function(req, res, next) {
 
 });
 
+router.get('/googleByLocation/:location/:option?', function(req, res, next) {
+  var location = req.params.location;
+  var option = req.params.option;
+  var returnValue = [];
+
+  if (!option)
+    option = '';
+
+  googleApi.getNear(location, option)
+  .then(resultActivity => {
+
+    neo4jActivity.createIfDoNotExiste(resultActivity, -1)
+    .then(activityArray => {
+      var tagArray = [];
+      var cityArray = [];
+
+      activityArray.forEach(activity => {
+        if(activity.type){
+          activity.type = activity.type.split(',');
+          activity.type.forEach(tag => {
+            if(tagArray.indexOf(tag) == -1)
+              tagArray.push(tag);
+          })
+        }
+        if(cityArray.indexOf(activity.city) == -1)
+          cityArray.push(activity.city);
+      })
+
+      neo4jTag.createMultyTag(tagArray)
+      .then(tagResult => {
+        activityArray.forEach(activity => {
+          if(activity.type)
+            tagResult.forEach(tag => {
+              if(activity.type.indexOf(tag.name) != -1){
+
+                neo4jTag.createLink(activity.id, tag.id)
+                .catch( error => {
+                  console.log(error);
+                  reject(error);
+                });
+              }
+            })
+        })
+      })
+      .catch(error => {
+        res.status(500).send(error);
+        console.log(error);
+      });
+
+      neo4jCity.createMultyCity(cityArray)
+      .then(cityResult => {
+        activityArray.forEach(activity => {
+          cityResult.forEach(city => {
+            tmpCity = city.name + " " + city.country;
+            if(activity.city == tmpCity){
+              neo4jCity.createLink(activity.id, city.id)
+              .catch( error => {
+                console.log(error);
+                reject(error);
+              });
+            }
+          })
+        })
+
+      })
+      .catch(error => {
+        res.status(500).send(error);
+        console.log(error);
+      });
+      
+      res.send(activityArray);
+
+    })
+    .catch(error => {
+      res.status(500).send(error);
+      console.log(error);
+    });
+  })
+  .catch(error => {
+    res.status(500).send(error);
+    console.log(error);
+  });
+
+});
+
 router.get('/testGoogleDetail/:tkn', function(req, res, next) {
   var tkn = req.params.tkn;
 
   googleApi.getDetail(tkn)
   .then(result => {
     console.log(result);
+    res.send(result)
+  }).catch(error => {
+    res.status(500).send(error);
+    console.log(error);
+  });
+
+});
+
+router.get('/testGoogleNameCity/:city', function(req, res, next) {
+  var city = req.params.city;
+
+  googleApi.getByName(city)
+  .then(result => {
+    var cityFromGoogle = result;
+
     res.send(result)
   }).catch(error => {
     res.status(500).send(error);

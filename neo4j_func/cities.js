@@ -1,4 +1,5 @@
 var session = require('../routes/databaseConnexion.js');
+var googleApi = require('../routes/google_api.js');
 
 module.exports = {
   getByGoogleId: function (id) {
@@ -56,7 +57,8 @@ module.exports = {
         });
 
         resolve(returnValue);
-      }).catch( error => {
+      })
+      .catch( error => {
         console.log(error);
         reject(error);
       });
@@ -86,6 +88,65 @@ module.exports = {
 
     })
   },
+  createMultyCity: function (citys) {
+    return new Promise((resolve, reject) => {
+      var returnValue = [];
+      var sizeInput = citys.length;
+      citys.forEach((city, key, arr) => {
+        googleApi.getByName(city)
+        .then(resultGoogleCity => {
+          this.createIfDoNotExiste(resultGoogleCity)
+          .then(el => {
+            returnValue.push(el);
+            if (returnValue.length == sizeInput)
+              resolve(returnValue);
+          })
+          .catch( error => {
+            console.log(error);
+            reject(error);
+          });
+        })
+        .catch( error => {
+          console.log(error);
+          reject(error);
+        });
+      })
+    })
+
+  },
+  createLink: function (idActivity, idCity) {
+    return new Promise((resolve, reject) => {
+
+      const resultPromise = session.run(
+        'Match (c:City),(a:Activity) Where ID(c) = '+ idCity +' AND ID(a) = ' + idActivity + ' ' +
+        'Create (c)-[:HAS]->(a) Return c',
+      );
+
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue;
+        records.forEach((element) => {
+          var el = element.get(0);
+          var city = {
+            "id" : el.identity.low,
+            "name" : el.properties.name,
+            "country" : el.properties.country,
+            "place_id" : el.properties.place_id,
+            "location" : el.properties.location
+          }
+          returnValue = city;
+        });
+
+        resolve(returnValue);
+
+      }).catch( error => {
+        console.log(error);
+        reject(error);
+      });
+
+
+    })
+  }
 
 
 
