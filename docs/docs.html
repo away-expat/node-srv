@@ -92,7 +92,15 @@
       <p class="description">Get all users.</p>
     </div>
     <div class="definition-div" id="getUsers">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type"></span> none</li>
       </ul>
@@ -103,6 +111,7 @@
         <li><span class="type">[string]</span> firstname</li>
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
         <li><span class="type">[int]</span> age</li>
       </ul>
     </div>
@@ -112,7 +121,15 @@
       <p class="description">Get user by id.</p>
     </div>
     <div class="definition-div" id="getUser">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (User)</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type"></span> none</li>
       </ul>
@@ -122,6 +139,7 @@
         <li><span class="type">[string]</span> firstname</li>
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
         <li><span class="type">[int]</span> age</li>
       </ul>
     </div>
@@ -131,14 +149,23 @@
       <p class="description">Create a new user.</p>
     </div>
     <div class="definition-div" id="createAccount">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[string]</span> firstname</li>
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
-        <li><span class="type">[int]</span> idCountry</li>
         <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[string]</span> country (Origin)</li>
         <li><span class="type">[int]</span> password</li>
+        <li><span class="type">[int]</span> idCountry (Follow)</li>
       </ul>
       <h3>Return :</h3>
       <ul class="list-param">
@@ -152,11 +179,19 @@
     </div>
 
     <div class="title-div" onclick="showDiv('updateAccount');">
-      <p class="route"><span class="method">PUT</span> /updateAccount</p>
+      <p class="route"><span class="method">PUT</span> /</p>
       <p class="description">Update user by id.</p>
     </div>
     <div class="definition-div" id="updateAccount">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[string]</span> firstname</li>
         <li><span class="type">[string]</span> lastname</li>
@@ -175,15 +210,23 @@
       </ul>
     </div>
 
-    <div class="title-div" onclick="showDiv('updateUserCountry');">
-      <p class="route"><span class="method">PUT</span> /updateUserCountry</p>
+    <div class="title-div" onclick="showDiv('updateUserCity');">
+      <p class="route"><span class="method">PUT</span> /updateUserCity</p>
       <p class="description">Update country of user.</p>
     </div>
-    <div class="definition-div" id="updateUserCountry">
+    <div class="definition-div" id="updateUserCity">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
-        <li><span class="type">[int]</span> id</li>
-		<li><span class="type">[string]</span> country</li>
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (User)</li>
+		    <li><span class="type">[int]</span> idCity (City)</li>
       </ul>
       <h3>Return :</h3>
       <ul class="list-param">
@@ -197,11 +240,19 @@
     </div>
 
     <div class="title-div" onclick="showDiv('deleteAccount');">
-      <p class="route"><span class="method">DELETE</span> /deleteAccount</p>
+      <p class="route"><span class="method">DELETE</span> /</p>
       <p class="description">Delete user.</p>
     </div>
     <div class="definition-div" id="deleteAccount">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[int]</span> id</li>
       </ul>
@@ -224,12 +275,20 @@
     <h2>Activities</h2>
     <p class="route">Add /activities before</p>
 
-    <div class="title-div" onclick="showDiv('getActivities');">
-      <p class="route"><span class="method">GET</span> /getActivities</p>
+    <div class="title-div" onclick="showDiv('getAllActivities');">
+      <p class="route"><span class="method">GET</span> /</p>
       <p class="description">Get all activities.</p>
     </div>
-    <div class="definition-div" id="getActivities">
+    <div class="definition-div" id="getAllActivities">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type"></span> none</li>
       </ul>
@@ -238,17 +297,28 @@
       <ul class="list-param">
         <li><span class="type">[int]</span> id</li>
         <li><span class="type">[string]</span> name</li>
-        <li><span class="type">[string]</span> type</li>
         <li><span class="type">[string]</span> address</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[float]</span> rating</li>
+        <li><span class="type">[string]</span> url</li>
+        <li><span class="type">[string]</span> photos</li>
       </ul>
     </div>
 
     <div class="title-div" onclick="showDiv('getActivity');">
-      <p class="route"><span class="method">GET</span> /getActivity/{id}</p>
+      <p class="route"><span class="method">GET</span> /{id}</p>
       <p class="description">Get one activities.</p>
     </div>
     <div class="definition-div" id="getActivity">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type"></span> none</li>
       </ul>
@@ -256,17 +326,28 @@
       <ul class="list-param">
         <li><span class="type">[int]</span> id</li>
         <li><span class="type">[string]</span> name</li>
-        <li><span class="type">[string]</span> type</li>
         <li><span class="type">[string]</span> address</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[float]</span> rating</li>
+        <li><span class="type">[string]</span> url</li>
+        <li><span class="type">[string]</span> photos</li>
       </ul>
     </div>
 
-    <div class="title-div" onclick="showDiv('getActivities');">
-      <p class="route"><span class="method">GET</span> /getActivitiesByCountry/{id}</p>
+    <div class="title-div" onclick="showDiv('ByCity');">
+      <p class="route"><span class="method">GET</span> /ByCity/{id}</p>
       <p class="description">Get all activities for country.</p>
     </div>
-    <div class="definition-div" id="getActivities">
+    <div class="definition-div" id="ByCity">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type"></span> none</li>
       </ul>
@@ -275,8 +356,73 @@
       <ul class="list-param">
         <li><span class="type">[int]</span> id</li>
         <li><span class="type">[string]</span> name</li>
-        <li><span class="type">[string]</span> type</li>
         <li><span class="type">[string]</span> address</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[float]</span> rating</li>
+        <li><span class="type">[string]</span> url</li>
+        <li><span class="type">[string]</span> photos</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('googleByCity');">
+      <p class="route"><span class="method">GET</span> /googleByCity/{city}/{option}</p>
+      <p class="description">Get all activities.</p>
+    </div>
+    <div class="definition-div" id="googleByCity">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> city</li>
+        <li><span class="type">[string]</span> option (Optional)</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> address</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[float]</span> rating</li>
+        <li><span class="type">[string]</span> url</li>
+        <li><span class="type">[string]</span> photos</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('googleByLocation');">
+      <p class="route"><span class="method">GET</span> /googleByLocation/{location}/{option}</p>
+      <p class="description">Get all activities.</p>
+    </div>
+    <div class="definition-div" id="googleByLocation">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> location</li>
+        <li><span class="type">[string]</span> option (Optional)</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> address</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[float]</span> rating</li>
+        <li><span class="type">[string]</span> url</li>
+        <li><span class="type">[string]</span> photos</li>
       </ul>
     </div>
 
@@ -291,11 +437,19 @@
     <p class="route">Add /events before</p>
 
     <div class="title-div" onclick="showDiv('getEvents');">
-      <p class="route"><span class="method">GET</span> /getEvents</p>
+      <p class="route"><span class="method">GET</span> /</p>
       <p class="description">Get all events.</p>
     </div>
     <div class="definition-div" id="getEvents">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type"></span> none</li>
       </ul>
@@ -311,11 +465,19 @@
     </div>
 
     <div class="title-div" onclick="showDiv('getEvent');">
-      <p class="route"><span class="method">GET</span> /getEvent/{id}</p>
+      <p class="route"><span class="method">GET</span> /{id}</p>
       <p class="description">Get one event.</p>
     </div>
     <div class="definition-div" id="getEvent">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (Event)</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type"></span> none</li>
       </ul>
@@ -334,9 +496,17 @@
       <p class="description">Get all events for an Activity.</p>
     </div>
     <div class="definition-div" id="getEventsByActivity">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
-      	<li><span class="type"></span> none</li>
+        <li><span class="type">[int]</span> id (Activity)</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
       </ul>
       <h3>Return :</h3>
       Array of objects like:
@@ -348,11 +518,19 @@
     </div>
 
     <div class="title-div" onclick="showDiv('postEvent');">
-      <p class="route"><span class="method">POST</span> /postEvent</p>
+      <p class="route"><span class="method">POST</span> /</p>
       <p class="description">Create Event.</p>
     </div>
     <div class="definition-div" id="postEvent">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[int]</span> idActivity</li>
         <li><span class="type">[int]</span> idUser</li>
@@ -375,7 +553,15 @@
       <p class="description">Participate to Event.</p>
     </div>
     <div class="definition-div" id="postParticipateAtEvent">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[int]</span> idEvent</li>
         <li><span class="type">[int]</span> idUser</li>
@@ -396,7 +582,15 @@
       <p class="description">Unparticipate to Event.</p>
     </div>
     <div class="definition-div" id="deleteParticipationAtEvent">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[int]</span> idEvent</li>
         <li><span class="type">[int]</span> idUser</li>
@@ -421,11 +615,19 @@
     <p class="route">Add /tags before</p>
 
     <div class="title-div" onclick="showDiv('getTags');">
-      <p class="route"><span class="method">GET</span> /getTags</p>
+      <p class="route"><span class="method">GET</span> /</p>
       <p class="description">Get all tags.</p>
     </div>
     <div class="definition-div" id="getTags">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type"></span> none</li>
       </ul>
@@ -438,11 +640,19 @@
     </div>
 
     <div class="title-div" onclick="showDiv('createTag');">
-      <p class="route"><span class="method">POST</span> /createTag</p>
+      <p class="route"><span class="method">POST</span> /</p>
       <p class="description">Create a new tag.</p>
     </div>
     <div class="definition-div" id="createTag">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[string]</span> name</li>
       </ul>
@@ -462,11 +672,19 @@
     <p class="route">Add /follow before</p>
 
     <div class="title-div" onclick="showDiv('getFollowByUser');">
-      <p class="route"><span class="method">GET</span> /getFollowByUser/{id}</p>
+      <p class="route"><span class="method">GET</span> /{id}</p>
       <p class="description">Get all users follow.</p>
     </div>
     <div class="definition-div" id="getFollowByUser">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (User)</li>
+      </ul>
+      <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type"></span> none</li>
       </ul>
@@ -483,14 +701,22 @@
     </div>
 
     <div class="title-div" onclick="showDiv('postFollowUser');">
-      <p class="route"><span class="method">POST</span> /postFollowUser</p>
+      <p class="route"><span class="method">POST</span> /</p>
       <p class="description">Follow one user.</p>
     </div>
     <div class="definition-div" id="postFollowUser">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
-        <li><span class="type">[int]</span> id</li>
-        <li><span class="type">[int]</span> idfollow</li>
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (User)</li>
+        <li><span class="type">[int]</span> idfollow (User)</li>
       </ul>
       <h3>Return :</h3>
       User Followed
@@ -505,14 +731,22 @@
     </div>
 
     <div class="title-div" onclick="showDiv('deleteFollowUser');">
-      <p class="route"><span class="method">DELETE</span> /deleteFollowUser</p>
+      <p class="route"><span class="method">DELETE</span> /</p>
       <p class="description">Unfollow one user.</p>
     </div>
     <div class="definition-div" id="deleteFollowUser">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
-        <li><span class="type">[int]</span> id</li>
-        <li><span class="type">[int]</span> idfollow</li>
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (User)</li>
+        <li><span class="type">[int]</span> idfollow (User)</li>
       </ul>
       <h3>Return :</h3>
       User Unfollowed

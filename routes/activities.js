@@ -147,7 +147,7 @@ router.get('/googleByLocation/:location/:option?', function(req, res, next) {
         res.status(500).send(error);
         console.log(error);
       });
-      
+
       res.send(activityArray);
 
     })
@@ -205,10 +205,14 @@ router.get('/', function(req, res, next) {
       var activity = {
         "id" : el.identity.low,
         "name" : el.properties.name,
-        "type" : el.properties.type,
-        "address" : el.properties.address
+        "address" : el.properties.address,
+        "place_id" : el.properties.place_id,
+        "rating" : el.properties.rating,
+        "url" : el.properties.url,
+        "photos" : el.properties.photos,
+        "type" : el.properties.type
       }
-      returnValue.push(activity);
+      returnValue = activity;
     });
 
     res.send(returnValue);
@@ -231,8 +235,12 @@ router.get('/:id', function(req, res, next) {
       var activity = {
         "id" : el.identity.low,
         "name" : el.properties.name,
-        "type" : el.properties.type,
-        "address" : el.properties.address
+        "address" : el.properties.address,
+        "place_id" : el.properties.place_id,
+        "rating" : el.properties.rating,
+        "url" : el.properties.url,
+        "photos" : el.properties.photos,
+        "type" : el.properties.type
       }
       returnValue = activity;
     });
@@ -243,7 +251,7 @@ router.get('/:id', function(req, res, next) {
   });
 });
 
-router.get('/getActivitiesByCountry/:id', function(req, res, next) {
+router.get('/ByCity/:id', function(req, res, next) {
   let id = req.params.id;
   const resultPromise = session.run(
     'MATCH (c: City)-[:HAS]->(a:Activity) WHERE ID(c) = ' + id + ' RETURN a',
