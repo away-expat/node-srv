@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
+const random128Hex = require('../core/random128').random128Hex;
+const jwt = require('jwt-simple');
 
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
@@ -18,7 +20,7 @@ router.get('/', function(req, res, next) {
         "lastname" : el.properties.lastname,
         "mail" : el.properties.mail,
         "country" : el.properties.country,
-        "age" : el.properties.age.low,
+        "birth" : el.properties.birth,
       }
       returnValue.push(user);
     });
@@ -46,7 +48,8 @@ router.get('/:id', function(req, res, next) {
         "lastname" : el.properties.lastname,
         "mail" : el.properties.mail,
         "country" : el.properties.country,
-        "age" : el.properties.age.low,
+        "birth" : el.properties.birth,
+        "token" :  el.properties.token
       }
       returnValue = user;
     });
@@ -60,48 +63,71 @@ router.get('/:id', function(req, res, next) {
 router.post('/', function(req, res, next) {
   var firstname = req.body.firstname;
   var lastname = req.body.lastname;
-  var age = req.body.age;
+  var birth = req.body.birth;
   var mail = req.body.mail;
   var country =  req.body.country;
   var password = req.body.password;
+  const token = jwt.encode({mail, password}, random128Hex())
 
-  const resultPromise = session.run(
-    'CREATE (n :User {firstname:"' + firstname + '", ' +
-    'lastname:"' + lastname + '", ' +
-    'age: ' + age + ', ' +
-    'mail:"' + mail + '", ' +
-    'password:"' + password + '", ' +
-    'country:"' + country + '"})'+
+  const checkExistancePromise = session.run(
+    'Match (n :User {' +
+    'mail:"' + mail + '" })'+
     'RETURN n',
   );
 
-  resultPromise.then(result => {
-    const records = result.records;
-    var returnValue = [];
-    records.forEach(function(element){
-      var el = element.get(0);
-      var user = {
-        "id" : el.identity.low,
-        "firstname" : el.properties.firstname,
-        "lastname" : el.properties.lastname,
-        "mail" : el.properties.mail,
-        "country" : el.properties.country,
-        "age" : el.properties.age.low,
-      }
-      returnValue = user;
-    });
+  checkExistancePromise.then(resul => {
+    const rec = resul.records;
+    if(rec.length > 0)
+      res.status(422).send("Email address already used !");
+    else {
+      const resultPromise = session.run(
+        'CREATE (n :User {firstname:"' + firstname + '", ' +
+        'lastname:"' + lastname + '", ' +
+        'birth: "' + birth + '", ' +
+        'mail:"' + mail + '", ' +
+        'password:"' + password + '", ' +
+        'token:"' + token + '", ' +
+        'country:"' + country + '"}) '+
+        'RETURN n',
+      );
 
-    res.send(returnValue);
-  }).catch( error => {
-    console.log(error);
-  });
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue = [];
+        records.forEach(function(element){
+          var el = element.get(0);
+          var user = {
+            "id" : el.identity.low,
+            "firstname" : el.properties.firstname,
+            "lastname" : el.properties.lastname,
+            "mail" : el.properties.mail,
+            "country" : el.properties.country,
+            "birth" : el.properties.birth,
+            "token" : el.properties.token,
+          }
+          returnValue = user;
+        });
+
+        res.send(returnValue);
+      }).catch( error => {
+        console.log(error);
+        res.status(500).send(error);
+      });
+    }
+
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).send(err);
+  })
+
 });
 
 router.put('/', function(req, res, next) {
   var id = req.body.id;
   var firstname = req.body.firstname;
   var lastname = req.body.lastname;
-  var age = req.body.age;
+  var birth = req.body.birth;
   var mail = req.body.mail;
   var country = req.body.country;
 
@@ -110,7 +136,7 @@ router.put('/', function(req, res, next) {
     'WHERE ID(n) = ' + id + ' ' +
     'SET n.firstname = "' + firstname + '", ' +
     'n.lastname = "' + lastname + '", ' +
-    'n.age = ' + age + ', ' +
+    'n.birth = "' + birth + '", ' +
     'n.country = ' + country + ', ' +
     'n.mail = "' + mail +  '"' +
     'RETURN n',
@@ -132,7 +158,7 @@ router.put('/', function(req, res, next) {
 router.delete('/', function(req, res, next) {
   var id = req.body.id;
   const resultPromise = session.run(
-    'MATCH (n :User) WHERE ID(n) = ' + id + ' SET n.firstname = "", n.lastname = "", n.age = 0, n.country = "", n.mail = "" RETURN n'
+    'MATCH (n :User) WHERE ID(n) = ' + id + ' SET n.firstname = "", n.lastname = "", n.birth = "", n.country = "", n.mail = "" RETURN n'
   );
 
   resultPromise.then(result => {
@@ -146,7 +172,7 @@ router.delete('/', function(req, res, next) {
         "lastname" : el.properties.lastname,
         "mail" : el.properties.mail,
         "country" : el.properties.country,
-        "age" : el.properties.age.low,
+        "birth" : el.properties.birth,
       }
       returnValue = user;
     });
@@ -188,31 +214,6 @@ router.put('/updateUserCity', function(req, res, next) {
     console.log(error);
   });
 });
-
-
-/*
-MATCH (n { name: 'Andy' })
-SET n.surname = 'Taylor'
-RETURN n.name, n.surname
-*/
-
-/*
-  Delete link
-MATCH (n { name: 'Andy' })-[r:KNOWS]->()
-DELETE r
-
-  Create link
-MATCH (a:City),(b:Activity)
-WHERE a.name = 'Tokyo' AND b.name = 'Kintaro'
-CREATE (a)-[l:HAS]->(b)
-RETURN a,b,l
-
-  Return Node with link ans node linked
-// Match(c:City {name:'Tokyo'})-[l:HAS]->(other) return c,l,other
-
-*/
-
-
 
 
 module.exports = router;

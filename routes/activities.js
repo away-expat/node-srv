@@ -192,6 +192,22 @@ router.get('/testGoogleNameCity/:city', function(req, res, next) {
 
 });
 
+router.get('/photo/:ref', function(req, res, next) {
+  var ref = req.params.ref;
+
+  googleApi.getPhotoPlaces(ref,100,100);
+  res.send([]);
+  /*
+  .then(result => {
+
+    res.send(result)
+  }).catch(error => {
+    res.status(500).send(error);
+    console.log(error);
+  });*/
+
+});
+
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
     'Match (a:Activity) Return a',
@@ -250,6 +266,32 @@ router.get('/:id', function(req, res, next) {
     console.log(error);
   });
 });
+/*
+router.post('/', function(req, res, next) {
+  var name = req.body.name;
+  var address = req.body.address;
+  var name = req.body.name;
+
+  neo4jCity.(adress, name, place_id, rating, types, url, photos, idCity).then(res => {
+
+      var activity = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "address" : el.properties.address,
+        "place_id" : el.properties.place_id,
+        "rating" : el.properties.rating,
+        "url" : el.properties.url,
+        "photos" : el.properties.photos,
+        "type" : el.properties.type
+      }
+
+    res.send([]);
+  }).catch( error => {
+    console.log(error);
+  });
+
+  res.send([]);
+});*/
 
 router.get('/ByCity/:id', function(req, res, next) {
   let id = req.params.id;

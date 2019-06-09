@@ -64,7 +64,7 @@ router.post('/', function(req, res, next) {
   let description = req.body.description;
 
   const resultPromise = session.run(
-    'MATCH (u:User), (a:Activity)'+
+    'MATCH (u:User), (a:Activity) '+
     'WHERE ID(u) = ' + idUser + ' AND ID(a) = ' + idActivity + ' ' +
     'CREATE (u)-[:CREATE]->(n :Event {date:"' + date + '", ' +
     'description:"' + description + '"})-[:INSTANCE]->(a)'+
@@ -222,6 +222,42 @@ router.delete('/deleteParticipationAtEvent', function(req, res, next) {
     });
 
     res.send(returnValue);
+
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.delete('/', function(req, res, next) {
+  let idEvent = req.body.idEvent;
+  let idUser = req.body.idUser;
+
+  const resultPromise = session.run(
+    'MATCH (e:Event)<-[:CREATE]-(u:User)' +
+    'WHERE ID(e) = ' + idEvent + ' AND ID(u) = ' + idUser + ' ' +
+    'DETACH DELETE e '
+  );
+
+  resultPromise.then(result => {
+    const records = result.summary;
+    console.log(records);
+    /*
+    var returnValue;
+    records.forEach(function(element){
+      var el = element.get(0);
+      var activity = element.get(1);
+      var event = {
+        "id" : el.identity.low,
+        "date" : el.properties.date,
+        "description" : el.properties.description,
+        "activityName" : activity.properties.name,
+        "activityId" : activity.identity.low,
+      }
+      returnValue = event;
+
+    });*/
+
+    res.send([]);
 
   }).catch( error => {
     console.log(error);

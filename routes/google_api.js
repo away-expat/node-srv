@@ -1,5 +1,5 @@
 const googleMaps = require('@google/maps').createClient({
-  key: "",
+  key: "AIzaSyB17-DLIRJDd2fZetdqBPByqyQn2n5F7KM",
   Promise: Promise
 });
 
@@ -135,7 +135,27 @@ module.exports = {
           console.log(err);
         });
     });
-  },/*
+  },
+  getPhotoPlaces: function (ref, width, height) {
+    return new Promise((resolve, reject) => {
+      googleMaps.placesPhoto({
+        photoreference: 'CmRaAAAA5cYWRrtX3LQV2_fHbO7sZ_H2ccJg35KTnRG8fi55JENF38PJ0s62S_1AK17MJIHAc653DIQ_kp9af6q7oija-xf3bWmys2bV-OrLm8JWZZ3ifNJOWnqDGt3zyU83u0jPEhDo6MKbGt8czABksdhDAmlAGhSdqqKQSssgk_R0-HZFdYsKLZlfQQ',
+        maxwidth: width,
+        maxheight: height
+      })
+      .then(function(response) {
+        console.log(response);
+        resolve(response);
+        //console.log(response);
+        //expect(response.headers['content-type']).toBe('image/jpeg');
+      })
+      .catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    })
+  },
+  /*
   getNextPage: function (token) {
     return new Promise((resolve, reject) => {
       googleMaps.placesNearby({
