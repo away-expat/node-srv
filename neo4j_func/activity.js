@@ -1,6 +1,7 @@
 var session = require('../routes/databaseConnexion.js');
 var googleApi = require('../routes/google_api.js');
 var neo4jTag = require('./tag.js');
+var apiKey = "";
 
 module.exports = {
   getByGoogleId: function (id) {
@@ -14,6 +15,8 @@ module.exports = {
         var returnValue;
         records.forEach((element) => {
           var el = element.get(0);
+          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+          photo += el.properties.photos;
           var activity = {
             "id" : el.identity.low,
             "name" : el.properties.name,
@@ -21,7 +24,7 @@ module.exports = {
             "place_id" : el.properties.place_id,
             "rating" : el.properties.rating,
             "url" : el.properties.url,
-            "photos" : el.properties.photos,
+            "photos" : photo,
             "type" : el.properties.types
           }
           returnValue = activity;
@@ -56,6 +59,8 @@ module.exports = {
         var returnValue;
         records.forEach(function(element){
           var el = element.get(0);
+          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+          photo += el.properties.photos;
           var activity = {
             "id" : el.identity.low,
             "name" : el.properties.name,
@@ -63,7 +68,7 @@ module.exports = {
             "place_id" : el.properties.place_id,
             "rating" : el.properties.rating,
             "url" : el.properties.url,
-            "photos" : el.properties.photos,
+            "photos" : photo,
             "type" : el.properties.type
           }
           returnValue = activity;
@@ -96,6 +101,8 @@ module.exports = {
         var returnValue;
         records.forEach(function(element){
           var el = element.get(0);
+          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+          photo += el.properties.photos;
           var activity = {
             "id" : el.identity.low,
             "name" : el.properties.name,

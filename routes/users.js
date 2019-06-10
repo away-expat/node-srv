@@ -3,6 +3,7 @@ var router = express.Router();
 var session = require('./databaseConnexion.js');
 const random128Hex = require('../core/random128').random128Hex;
 const jwt = require('jwt-simple');
+var neo4jUser = require('../neo4j_func/user.js');
 
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
@@ -69,15 +70,9 @@ router.post('/', function(req, res, next) {
   var password = req.body.password;
   const token = jwt.encode({mail, password}, random128Hex())
 
-  const checkExistancePromise = session.run(
-    'Match (n :User {' +
-    'mail:"' + mail + '" })'+
-    'RETURN n',
-  );
-
-  checkExistancePromise.then(resul => {
-    const rec = resul.records;
-    if(rec.length > 0)
+  neo4jUser.findOne(mail)
+  .then(userCreate => {
+    if(userCreate)
       res.status(422).send("Email address already used !");
     else {
       const resultPromise = session.run(

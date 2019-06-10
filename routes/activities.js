@@ -192,22 +192,6 @@ router.get('/testGoogleNameCity/:city', function(req, res, next) {
 
 });
 
-router.get('/photo/:ref', function(req, res, next) {
-  var ref = req.params.ref;
-
-  googleApi.getPhotoPlaces(ref,100,100);
-  res.send([]);
-  /*
-  .then(result => {
-
-    res.send(result)
-  }).catch(error => {
-    res.status(500).send(error);
-    console.log(error);
-  });*/
-
-});
-
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
     'Match (a:Activity) Return a',
@@ -217,7 +201,10 @@ router.get('/', function(req, res, next) {
     const records = result.records;
     var returnValue = [];
     records.forEach(function(element){
+      console.log(records);
       var el = element.get(0);
+      var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key=&photoreference=";
+      photo += el.properties.photos;
       var activity = {
         "id" : el.identity.low,
         "name" : el.properties.name,
@@ -225,10 +212,10 @@ router.get('/', function(req, res, next) {
         "place_id" : el.properties.place_id,
         "rating" : el.properties.rating,
         "url" : el.properties.url,
-        "photos" : el.properties.photos,
+        "photos" : photo,
         "type" : el.properties.type
       }
-      returnValue = activity;
+      returnValue.push(activity);
     });
 
     res.send(returnValue);
@@ -266,6 +253,7 @@ router.get('/:id', function(req, res, next) {
     console.log(error);
   });
 });
+
 /*
 router.post('/', function(req, res, next) {
   var name = req.body.name;

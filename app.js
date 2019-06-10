@@ -11,7 +11,8 @@ var activitiesRouter = require('./routes/activities');
 var tagsRouter = require('./routes/tags');
 var followRouter = require('./routes/follow');
 var eventsRouter = require('./routes/events');
-var auth = require('./auth');
+var auth = require('./routes/auth');
+//var auth = require('./auth');
 
 var app = express();
 
@@ -41,8 +42,30 @@ app.use('/tags', tagsRouter);
 app.use('/follow', followRouter);
 app.use('/events', eventsRouter);
 app.use('/auth', auth);
-/*
 
+
+
+var passport = require('passport');
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
+
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var config = require('./oAuth.js');
+var neo4jUser = require('./neo4j_func/user.js');
+
+// ICI
+var authentification = require('./routes/authentification');
+app.use('/authentification/', authentification);
+
+var session = require('express-session');
 app.use(session({
   cookieName: 'session',
   secret: 'keyboard cat',
@@ -51,9 +74,44 @@ app.use(session({
 }));
 
 
-app.use(passport.initialize());
-app.use(passport.session());
-*/
+
+//ICI
+passport.use('google', new GoogleStrategy({
+      clientID        : config.google.clientID,
+      clientSecret    : config.google.clientSecret,
+      callbackURL     : config.google.callbackURL,
+      profileFields: ['id', 'emails', 'name']
+    },
+    function(access_token, refresh_token, profile, done) {
+      process.nextTick(function() {
+        var mail = profile.emails[0].value;
+        var lastname = profile.name.familyName;
+        var firstname = profile.name.givenName;
+
+        neo4jUser.findOne(mail)
+        .then(user => {
+          if (user)
+            return done(null, user);
+          else {
+            neo4jUser.createGoogleConnexion(firstname, lastname, mail)
+            .then(result => {
+              return done(null, result);
+            })
+            .catch(error => {
+              console.log(error);
+              return done(error);
+            });
+          }
+
+        })
+        .catch(error => {
+          console.log(error);
+          return done(error);
+        });
+      });
+    }
+));
+
 
 
 // catch 404 and forward to error handler
