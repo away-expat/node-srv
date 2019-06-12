@@ -1,0 +1,42 @@
+
+      /*
+      var nextPageToken = response.json.next_page_token;
+      getNextPage(nextPageToken, googleMapsClient);
+
+*/
+      /*
+      responseLenght = response.json.results.length;
+      //console.log(responseLenght);
+      for(i = 0; i < responseLenght; i++){
+        var place = response.json.results[i];
+        if(place.types[0]!= 'locality');
+        var element = {
+          "name" : place.name,
+          "place_id" : place.place_id,
+          "rating" : place.rating,
+          "vicinity" : place.vicinity,
+          "types" : place.types,
+          "location" : place.geometry.location
+        }
+        console.log(element);
+      }
+
+      */
+
+
+      googleMaps.placesQueryAutoComplete({
+            input: 'pizza near New York',
+            language: 'en',
+            location: [40.724, -74.013],
+            radius: 5000
+          })
+          .asPromise()
+          .then(function(response) {
+            expect(response.json.predictions).toEqual(
+                arrayContaining([
+                  objectContaining({
+                    description: 'pizza near New York, NY, USA'
+                  })
+                ]));
+          })
+          .then(done, fail);

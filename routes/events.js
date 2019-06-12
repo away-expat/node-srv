@@ -77,14 +77,14 @@ router.post('/', function(req, res, next) {
     records.forEach(function(element){
       var el = element.get(0);
       var activity = element.get(1);
-      var event = {
+      var evenement = {
         "id" : el.identity.low,
         "date" : el.properties.date,
         "description" : el.properties.description,
         "activityName" : activity.properties.name,
         "activityId" : activity.identity.low,
       }
-      returnValue = event;
+      returnValue = evenement;
     });
 
     res.send(returnValue);
@@ -95,22 +95,86 @@ router.post('/', function(req, res, next) {
 });
 
 router.get('/getEventWithDetails/:id', function(req, res, next) {
-    let id = req.params.id
+  let id = req.params.id
   const resultPromise = session.run(
-    'Match (e: Event)-[:INSTANCE]->(a:Activity)-[:TYPE]->(t:Tag), (e)<-[:TAKEPART]-(u:User) Where ID(e) = ' + id + '  Return e,a,t,u'
+    'Match (u:User)-[:CREATE]->(e: Event)-[:INSTANCE]->(a:Activity)-[:TYPE]->(t:Tag) Where ID(e) = ' + id + '  Return u,e,a,t'
   );
 
   resultPromise.then(result => {
     const records = result.records;
-    console.log(records);
+    var returnValue = {};
+    var u = records[0].get(0);
+    var user = {
+      "id" : u.identity.low,
+      "firstname" : u.properties.firstname,
+      "lastname" : u.properties.lastname,
+    }
+
+    var e = records[0].get(1);
+    var event = {
+      "id" : e.identity.low,
+      "date" : e.properties.date,
+      "description" : e.properties.description
+    };
+
+    var a = records[0].get(2);
+    var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+    photo += a.properties.photos;
+    var activity = {
+      "id" : a.identity.low,
+      "name" : a.properties.name,
+      "address" : a.properties.address,
+      "place_id" : a.properties.place_id,
+      "rating" : a.properties.rating,
+      "url" : a.properties.url,
+      "photos" : photo,
+      "type" : a.properties.type
+    }
+    returnValue.creator = user;
+    returnValue.event = event;
+    returnValue.activity = activity;
+    returnValue.tag = [];
+    returnValue.participant = [];
+    records.forEach(element => {
+      var el = element.get(3);
+      var tag = {
+        "id" : el.identity.low,
+        "name": el.properties.name,
+      }
+      returnValue.tag.push(tag);
+    })
+
+    const resultPromiseUser = session.run(
+      'Match (u:User)-[:TAKEPART]->(e: Event) Where ID(e) = ' + id + '  Return u'
+    );
+
+    resultPromiseUser.then(users => {
+      const usersArray = users.records;
+      usersArray.forEach(function(element){
+        var el = element.get(0);
+        var user = {
+          "id" : el.identity.low,
+          "firstname" : el.properties.firstname,
+          "lastname" : el.properties.lastname,
+        }
+        returnValue.participant.push(user);
+      });
+    }).catch( error => {
+      res.status(500).send(error);
+      console.log(error);
+    });
+
+
+    /*
     //console.log(records[0]._fields);
     var returnValue = [];
     records.forEach(function(element){
       returnValue.push(element.get(0));
     });
-
+    */
     res.send(returnValue);
   }).catch( error => {
+    res.status(500).send(error);
     console.log(error);
   });
 });

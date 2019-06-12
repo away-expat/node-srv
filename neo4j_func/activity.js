@@ -1,7 +1,6 @@
 var session = require('../routes/databaseConnexion.js');
 var googleApi = require('../routes/google_api.js');
 var neo4jTag = require('./tag.js');
-var apiKey = "";
 
 module.exports = {
   getByGoogleId: function (id) {
@@ -22,11 +21,25 @@ module.exports = {
             "name" : el.properties.name,
             "address" : el.properties.address,
             "place_id" : el.properties.place_id,
-            "rating" : el.properties.rating,
             "url" : el.properties.url,
             "photos" : photo,
-            "type" : el.properties.types
+            "type" : el.properties.type
           }
+          if(el.properties.rating.low)
+            activity.rating = el.properties.rating.low;
+          else
+            activity.rating = el.properties.rating;
+            /*
+          var type = [];
+          if(el.properties.type) {
+            console.log(el.properties.type);
+            var tmp = el.properties.type.split(',');
+            tmp.forEach(t =>{
+              type.push(t);
+            })
+            activity.type = type;
+          }*/
+
           returnValue = activity;
         });
 
@@ -66,11 +79,15 @@ module.exports = {
             "name" : el.properties.name,
             "address" : el.properties.address,
             "place_id" : el.properties.place_id,
-            "rating" : el.properties.rating,
             "url" : el.properties.url,
             "photos" : photo,
             "type" : el.properties.type
           }
+          if(el.properties.rating.low)
+            activity.rating = el.properties.rating.low;
+          else
+            activity.rating = el.properties.rating;
+
           returnValue = activity;
         });
 
@@ -108,11 +125,15 @@ module.exports = {
             "name" : el.properties.name,
             "address" : el.properties.address,
             "place_id" : el.properties.place_id,
-            "rating" : el.properties.rating,
             "url" : el.properties.url,
             "photos" : el.properties.photos,
             "type" : el.properties.type
           }
+          if(el.properties.rating.low)
+            activity.rating = el.properties.rating.low;
+          else
+            activity.rating = el.properties.rating;
+
           returnValue = activity;
         });
 
@@ -185,4 +206,73 @@ module.exports = {
 
     })
   },
+  getFromCityAndTag: function (idCity, idTag) {
+    return new Promise((resolve, reject) => {
+      const resultPromise = session.run(
+        'Match (c:City)-[:HAS]->(a:Activity)-[:TYPE]->(t:Tag) WHERE ID(c)= ' +idCity+ ' AND ID(t)=' +idTag+ ' Return a',
+      );
+
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue = [];
+        records.forEach((element) => {
+          var el = element.get(0);
+          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+          photo += el.properties.photos;
+          var activity = {
+            "id" : el.identity.low,
+            "name" : el.properties.name,
+            "address" : el.properties.address,
+            "place_id" : el.properties.place_id,
+            "rating" : el.properties.rating,
+            "url" : el.properties.url,
+            "photos" : photo,
+            "type" : el.properties.types
+          }
+          returnValue.push(activity);
+        });
+
+        resolve(returnValue);
+
+      }).catch( error => {
+        console.log(error);
+        reject(error);
+      });
+    })
+  },
+  getFromCityAndTagWithEvent: function (idCity, idTag) {
+    return new Promise((resolve, reject) => {
+      const resultPromise = session.run(
+        'Match (c:City)-[:HAS]->(a:Activity)-[:TYPE]->(t:Tag), (a)<-[:INSTANCE]-(:Event) WHERE ID(c)= ' +idCity+ ' AND ID(t)=' +idTag+ ' Return a',
+      );
+
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue = [];
+        records.forEach((element) => {
+          var el = element.get(0);
+          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+          photo += el.properties.photos;
+          var activity = {
+            "id" : el.identity.low,
+            "name" : el.properties.name,
+            "address" : el.properties.address,
+            "place_id" : el.properties.place_id,
+            "rating" : el.properties.rating,
+            "url" : el.properties.url,
+            "photos" : photo,
+            "type" : el.properties.types
+          }
+          returnValue.push(activity);
+        });
+
+        resolve(returnValue);
+
+      }).catch( error => {
+        console.log(error);
+        reject(error);
+      });
+    })
+  },
+
 };

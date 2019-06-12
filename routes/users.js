@@ -4,6 +4,7 @@ var session = require('./databaseConnexion.js');
 const random128Hex = require('../core/random128').random128Hex;
 const jwt = require('jwt-simple');
 var neo4jUser = require('../neo4j_func/user.js');
+var sha1 = require('sha1');
 
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
@@ -35,7 +36,7 @@ router.get('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
   let id = req.params.id
   const resultPromise = session.run(
-    'MATCH (n :User) WHERE ID(n) = ' + id + ' RETURN n',
+    'MATCH (n :User)-[:AT]->(c :City) WHERE ID(n) = ' + id + ' RETURN n,c',
   );
 
   resultPromise.then(result => {
@@ -43,6 +44,14 @@ router.get('/:id', function(req, res, next) {
     var returnValue;
     records.forEach(function(element){
       var el = element.get(0);
+      var c = element.get(1);
+      var city = {
+        "id" : c.identity.low,
+        "name" : c.properties.name,
+        "country" : c.properties.country,
+        "place_id" : c.properties.place_id,
+        "location" : c.properties.location
+      }
       var user = {
         "id" : el.identity.low,
         "firstname" : el.properties.firstname,
@@ -52,6 +61,7 @@ router.get('/:id', function(req, res, next) {
         "birth" : el.properties.birth,
         "token" :  el.properties.token
       }
+      user.at = city;
       returnValue = user;
     });
 
@@ -75,6 +85,7 @@ router.post('/', function(req, res, next) {
     if(userCreate)
       res.status(422).send("Email address already used !");
     else {
+      password = sha1(password + "toofarfar");
       const resultPromise = session.run(
         'CREATE (n :User {firstname:"' + firstname + '", ' +
         'lastname:"' + lastname + '", ' +
@@ -132,7 +143,7 @@ router.put('/', function(req, res, next) {
     'SET n.firstname = "' + firstname + '", ' +
     'n.lastname = "' + lastname + '", ' +
     'n.birth = "' + birth + '", ' +
-    'n.country = ' + country + ', ' +
+    'n.country = "' + country + '", ' +
     'n.mail = "' + mail +  '"' +
     'RETURN n',
   );

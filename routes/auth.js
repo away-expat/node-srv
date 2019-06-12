@@ -11,11 +11,13 @@ router.post('/login', function(req, res) {
   if(mail && password)
     neo4jUser.findOne(mail)
     .then(result => {
-      if(result)
+      if(result){
+        password = sha1(password + "toofarfar");
         if(password == result.password)
           res.send(result);
         else
           res.status(500).send("Mail and password not valid");
+      }
       else
         res.status(500).send("User not found");
     })

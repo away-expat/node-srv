@@ -124,6 +124,32 @@ module.exports = {
 
 
     })
-  }
+  },
+  getTags: function (id) {
+    return new Promise((resolve, reject) => {
+      const resultPromise = session.run(
+        'MATCH (n:User)-[:LIKE]->(t:Tag) WHERE ID(n) = ' + id + ' RETURN t',
+      );
+
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue = [];
+        records.forEach((element) => {
+          var el = element.get(0);
+          var tag = {
+            "id" : el.identity.low,
+            "name" : el.properties.name,
+          }
+          returnValue.push(tag);
+        });
+
+        resolve(returnValue);
+
+      }).catch( error => {
+        console.log(error);
+        reject(error);
+      });
+    })
+  },
 
 };

@@ -1,5 +1,5 @@
 const googleMaps = require('@google/maps').createClient({
-  key: "",
+
   Promise: Promise
 });
 
@@ -62,10 +62,13 @@ module.exports = {
               country = add.long_name;
           })
 
+
           var address = detailElement.json.result.formatted_address;
           var name = detailElement.json.result.name;
           var place_id = detailElement.json.result.place_id;
-          var rating = detailElement.json.result.rating;
+          var rating = -1;
+          if(detailElement.json.result.rating)
+            rating = detailElement.json.result.rating;
           var url = detailElement.json.result.url;
           var photos;
           if(detailElement.json.result.photos)
@@ -114,11 +117,6 @@ module.exports = {
         .then((response) => {
           if(response.json.status == 'OK'){
             var returnValue = []
-            /*
-            while(nexPage){
-            this.getNextPage(token)
-            }
-            */
             response.json.results.forEach(el => {
               if(el.types[0] != 'locality' && el.types[0] != 'colloquial_area' && el.types[0] != 'sublocality_level_1'){
                 returnValue.push(el.place_id);
@@ -136,9 +134,9 @@ module.exports = {
         });
     });
   },
-  /*
   getNextPage: function (token) {
     return new Promise((resolve, reject) => {
+      /*
       googleMaps.placesNearby({
           location: location,
           radius: 5000,
@@ -159,6 +157,7 @@ module.exports = {
         .catch((err) => {
           console.log(err);
         });
+        */
     });
-  },*/
+  },
 };

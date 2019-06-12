@@ -5,6 +5,23 @@ var googleApi = require('./google_api.js');
 var neo4jCity = require('../neo4j_func/cities.js');
 var neo4jActivity = require('../neo4j_func/activity.js');
 var neo4jTag = require('../neo4j_func/tag.js');
+var neo4jUser = require('../neo4j_func/user.js');
+var neo4jEvent = require('../neo4j_func/event.js');
+
+router.get('/clearDataBase', function(req, res, next) {
+  const resultPromise = session.run(
+    'Match (a) Detach Delete a',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    console.log(records);
+
+    res.send([]);
+  }).catch( error => {
+    console.log(error);
+  });
+});
 
 router.get('/googleByCity/:city/:option?', function(req, res, next) {
   var city = req.params.city;
@@ -192,6 +209,112 @@ router.get('/testGoogleNameCity/:city', function(req, res, next) {
 
 });
 
+router.get('/suggestion', function(req, res, next) {
+  var token = req.headers['authorization'];
+
+  neo4jUser.findOneByTkn(token)
+  .then(result => {
+
+    neo4jTag.getTags(result.id)
+    .then(tags => {
+
+      tags.forEach(tag => {
+        var limite = 0;
+
+        neo4jActivity.getFromCityAndTagWithEvent(result.at.id, tag.id)
+        .then(activities => {
+            var endLength = activities.length;
+            var eventArray = [];
+            var numberOfEvent = 0;
+            activities.forEach(activity => {
+              if(limite < 5){
+                neo4jEvent.getNextEvent(activity.id)
+                .then(event => {
+                  eventArray.push(event);
+                  numberOfEvent++;
+                  if(numberOfEvent == endLength)
+                    res.send(eventArray);
+
+                })
+                .catch(error => {
+                  console.log(error);
+                  res.status(500).send(error);
+                })
+
+                limite += 1;
+              }
+            })
+        })
+        .catch(error => {
+          console.log(error);
+          res.status(500).send(error);
+        })
+
+      }) //forEach
+
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).send(error);
+    })
+
+  })
+  .catch(error => {
+    console.log(error);
+    res.status(500).send(error);
+  })
+});
+
+router.get('/ByTag/:tag/', function(req, res, next) {
+  let token = req.headers['authorization'];
+  let idTag = req.params.tag;
+  console.log(tkn);
+
+  neo4jUser.findOneByTkn(token)
+  .then(result => {
+
+    neo4jActivity.getFromCityAndTag(result.at.id, idTag)
+    .then(activities => {
+        res.send(activities);
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).send(error);
+    })
+
+  })
+  .catch(error => {
+    console.log(error);
+    res.status(500).send(error);
+  })
+});
+
+router.get('/ByCity/:id', function(req, res, next) {
+  let id = req.params.id;
+  const resultPromise = session.run(
+    'MATCH (c: City)-[:HAS]->(a:Activity) WHERE ID(c) = ' + id + ' RETURN a',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      var el = element.get(0);
+      var activity = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "type" : el.properties.type,
+        "address" : el.properties.address
+      }
+      returnValue.push(activity);
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
     'Match (a:Activity) Return a',
@@ -203,7 +326,7 @@ router.get('/', function(req, res, next) {
     records.forEach(function(element){
       console.log(records);
       var el = element.get(0);
-      var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key=&photoreference=";
+      var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
       photo += el.properties.photos;
       var activity = {
         "id" : el.identity.low,
@@ -254,58 +377,7 @@ router.get('/:id', function(req, res, next) {
   });
 });
 
-/*
-router.post('/', function(req, res, next) {
-  var name = req.body.name;
-  var address = req.body.address;
-  var name = req.body.name;
 
-  neo4jCity.(adress, name, place_id, rating, types, url, photos, idCity).then(res => {
-
-      var activity = {
-        "id" : el.identity.low,
-        "name" : el.properties.name,
-        "address" : el.properties.address,
-        "place_id" : el.properties.place_id,
-        "rating" : el.properties.rating,
-        "url" : el.properties.url,
-        "photos" : el.properties.photos,
-        "type" : el.properties.type
-      }
-
-    res.send([]);
-  }).catch( error => {
-    console.log(error);
-  });
-
-  res.send([]);
-});*/
-
-router.get('/ByCity/:id', function(req, res, next) {
-  let id = req.params.id;
-  const resultPromise = session.run(
-    'MATCH (c: City)-[:HAS]->(a:Activity) WHERE ID(c) = ' + id + ' RETURN a',
-  );
-
-  resultPromise.then(result => {
-    const records = result.records;
-    var returnValue = [];
-    records.forEach(function(element){
-      var el = element.get(0);
-      var activity = {
-        "id" : el.identity.low,
-        "name" : el.properties.name,
-        "type" : el.properties.type,
-        "address" : el.properties.address
-      }
-      returnValue.push(activity);
-    });
-
-    res.send(returnValue);
-  }).catch( error => {
-    console.log(error);
-  });
-});
 
 
 
