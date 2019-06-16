@@ -151,5 +151,52 @@ module.exports = {
       });
     })
   },
+  createLinkUser: function (idUser, idTag) {
+    return new Promise((resolve, reject) => {
+
+      const resultPromise = session.run(
+        'Match (u:User),(t:Tag) Where ID(u) = '+ idUser +' AND ID(t) = ' + idTag + ' ' +
+        'Create (u)-[:LIKE]->(t) Return t',
+      );
+
+      resultPromise.then(result => {
+        const records = result.records;
+        var el = records[0].get(0);
+        var tag = {
+          "id" : el.identity.low,
+          "name" : el.properties.name
+        }
+        resolve(tag);
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+
+    })
+  },
+  userSee: function (idUser, name) {
+    return new Promise((resolve, reject) => {
+
+      const resultPromise = session.run(
+        'Match (u:User),(t:Tag {name : "' + name + '"}) Where ID(u) = '+ idUser +' ' +
+        'Create (u)-[:SEE]->(t) Return t',
+      );
+
+      resultPromise.then(result => {
+        const records = result.records;
+        var el = records[0].get(0);
+        var tag = {
+          "id" : el.identity.low,
+          "name" : el.properties.name
+        }
+        resolve(tag);
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+
+    })
+  },
+
 
 };

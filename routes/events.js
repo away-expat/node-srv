@@ -1,6 +1,28 @@
 var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
+var apiKey =
+
+// Auth User
+var currentUser;
+router.use(function (req, res, next) {
+  var token = req.headers['authorization'];
+  neo4jUser.findOneByTkn(token)
+  .then(user => {
+    if(user){
+      currentUser = user;
+      next();
+    }
+    else {
+      console.log("Erreur d'authentification !");
+      res.status(401).send("Erreur d'authentification !");
+    }
+  })
+  .catch( error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
 
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
@@ -25,12 +47,13 @@ router.get('/', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
 router.get('/:id', function(req, res, next) {
-    let id = req.params.id
+  let id = req.params.id
   const resultPromise = session.run(
     'Match (e: Event)-[:INSTANCE]->(a:Activity) Where ID(e) = ' + id + '  Return e,a'
   );
@@ -53,13 +76,14 @@ router.get('/:id', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
 router.post('/', function(req, res, next) {
   let idActivity = req.body.idActivity;
-  let idUser = req.body.idUser;
+  let idUser = currentUser.id;
   let date = req.body.date;
   let description = req.body.description;
 
@@ -90,7 +114,8 @@ router.post('/', function(req, res, next) {
     res.send(returnValue);
 
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
@@ -160,22 +185,14 @@ router.get('/getEventWithDetails/:id', function(req, res, next) {
         returnValue.participant.push(user);
       });
     }).catch( error => {
-      res.status(500).send(error);
-      console.log(error);
+      console.log('Error : ' + error);
+      res.status(500).send('Error : ' + error);
     });
 
-
-    /*
-    //console.log(records[0]._fields);
-    var returnValue = [];
-    records.forEach(function(element){
-      returnValue.push(element.get(0));
-    });
-    */
     res.send(returnValue);
   }).catch( error => {
-    res.status(500).send(error);
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
@@ -200,7 +217,8 @@ router.get('/getEventsByActivity/:id', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
@@ -220,13 +238,14 @@ router.get('/getAttendeesByEvent/:id', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
 router.post('/postParticipateAtEvent', function(req, res, next) {
   let idEvent = req.body.idEvent;
-  let idUser = req.body.idUser;
+  let idUser = currentUser.id;
 
   const resultPromise = session.run(
     'MATCH (e:Event)-[:INSTANCE]->(a :Activity),(u:User) ' +
@@ -254,13 +273,14 @@ router.post('/postParticipateAtEvent', function(req, res, next) {
     res.send(returnValue);
 
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
 router.delete('/deleteParticipationAtEvent', function(req, res, next) {
   let idEvent = req.body.idEvent;
-  let idUser = req.body.idUser;
+  let idUser = currentUser.id;
 
   const resultPromise = session.run(
     'MATCH (u:User)-[r:TAKEPART]->(e:Event)-[:INSTANCE]->(a :Activity)' +
@@ -288,13 +308,14 @@ router.delete('/deleteParticipationAtEvent', function(req, res, next) {
     res.send(returnValue);
 
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
 router.delete('/', function(req, res, next) {
   let idEvent = req.body.idEvent;
-  let idUser = req.body.idUser;
+  let idUser = currentUser.id;
 
   const resultPromise = session.run(
     'MATCH (e:Event)<-[:CREATE]-(u:User)' +
@@ -324,7 +345,8 @@ router.delete('/', function(req, res, next) {
     res.send([]);
 
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 

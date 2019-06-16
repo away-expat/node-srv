@@ -3,6 +3,26 @@ var router = express.Router();
 var session = require('./databaseConnexion.js');
 var neo4jFunc = require('../neo4j_func/cities.js');
 
+// Auth User
+var currentUser;
+router.use(function (req, res, next) {
+  var token = req.headers['authorization'];
+  neo4jUser.findOneByTkn(token)
+  .then(user => {
+    if(user){
+      currentUser = user;
+      next();
+    }
+    else {
+      console.log("Erreur d'authentification !");
+      res.status(401).send("Erreur d'authentification !");
+    }
+  })
+  .catch( error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
 
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
@@ -26,8 +46,8 @@ router.get('/', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
-    res.status(500).send(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
@@ -55,8 +75,8 @@ router.get('/:id', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
-    res.status(500).send(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
@@ -68,8 +88,8 @@ router.get('/google/:id', function(req, res, next) {
     res.send(result);
     console.log(result);
   }).catch( error => {
-    console.log(error);
-    res.status(500).send(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
@@ -77,7 +97,7 @@ router.get('/getCityByName/:name', function(req, res, next) {
   let name = req.params.name;
 
   const resultPromise = session.run(
-    'Match (c:City {name:"' + name + '"}) Return c',
+    'Match (c:City) where lower(n.Name) contains lower('+name+') Return c',
   );
 
   resultPromise.then(result => {
@@ -86,8 +106,8 @@ router.get('/getCityByName/:name', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
-    res.status(500).send(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
@@ -100,61 +120,11 @@ router.post('/', function(req, res, next) {
   neo4jFunc.create(name, country, place_id, location)
   .then((result) => {
     res.send(result);
-    console.log(result);
   }).catch( error => {
-    console.log(error);
-    res.status(500).send(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 
 });
-/*
-router.get('/getCityByNameAndTag/:name/:idTag', function(req, res, next) {
-  let name = req.params.name;
-  let idTag = req.params.idTag;
-
-
-  const resultPromise = session.run(
-    'Match (c:City {name:"' + name + '"})-[l:HAS]->(otherNode) Return c,l,otherNode',
-  );
-
-  resultPromise.then(result => {
-    const sizeOfNodeLinked = result.records.length;
-    var returnValue = [];
-    returnValue.push(result.records[0]._fields[0].properties);
-    for(var i = 0; i < sizeOfNodeLinked; i++){
-      returnValue.push(result.records[i]._fields[2].properties);
-      //console.log(returnValue[i]);
-    }
-
-    res.send(returnValue);
-  }).catch( error => {
-    console.log(error);
-  });
-});
-
-router.get('/get/:name/:link/:type', function(req, res, next) {
-  let name = req.params.name;
-  let link = req.params.link;
-  let type = req.params.type;
-
-  const resultPromise = session.run(
-    'Match (c:City {name:"' + name + '"})-[l:' + link + ' {type: "' + type + '"}]->(otherNode) Return c,l,otherNode',
-  );
-
-  resultPromise.then(result => {
-    const sizeOfNodeLinked = result.records.length;
-    var returnValue = [];
-    returnValue.push(result.records[0]._fields[0].properties);
-    for(var i = 0; i < sizeOfNodeLinked; i++){
-      returnValue.push(result.records[i]._fields[2].properties);
-      //console.log(returnValue[i]);
-    }
-
-    res.send(returnValue);
-  }).catch( error => {
-    console.log(error);
-  });
-});
-*/
 
 module.exports = router;

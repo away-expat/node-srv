@@ -68,8 +68,8 @@ module.exports = {
         });
 
         resolve(returnValue);
-
-      }).catch( error => {
+      })
+      .catch( error => {
         console.log(error);
         reject(error);
       });

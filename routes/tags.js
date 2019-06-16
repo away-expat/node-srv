@@ -25,6 +25,27 @@ router.get('/', function(req, res, next) {
   });
 });
 
+// Auth User
+var currentUser;
+router.use(function (req, res, next) {
+  var token = req.headers['authorization'];
+  neo4jUser.findOneByTkn(token)
+  .then(user => {
+    if(user){
+      currentUser = user;
+      next();
+    }
+    else {
+      console.log("Erreur d'authentification !");
+      res.status(401).send("Erreur d'authentification !");
+    }
+  })
+  .catch( error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
+
 router.post('/', function(req, res, next) {
   let name = req.body.name;
   console.log(name);
@@ -47,7 +68,8 @@ router.post('/', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 

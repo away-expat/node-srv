@@ -1,5 +1,5 @@
 const googleMaps = require('@google/maps').createClient({
-
+  key: 
   Promise: Promise
 });
 
@@ -110,54 +110,103 @@ module.exports = {
       googleMaps.placesNearby({
           location: location,
           radius: 5000,
-          //rankby: 'distance',
           type: type
         })
         .asPromise()
         .then((response) => {
           if(response.json.status == 'OK'){
-            var returnValue = []
+            var tokenNextPage = "";
+            if(response.json.next_page_token)
+              tokenNextPage = response.json.next_page_token;
+
+            var returnValueActivities = []
             response.json.results.forEach(el => {
               if(el.types[0] != 'locality' && el.types[0] != 'colloquial_area' && el.types[0] != 'sublocality_level_1'){
-                returnValue.push(el.place_id);
+                returnValueActivities.push(el.place_id);
               }
             });
-
+            var returnValue = {
+              "results" : returnValueActivities,
+              "token" : tokenNextPage
+            }
             resolve(returnValue);
           } else {
             resolve([]);
           }
-
         })
         .catch((err) => {
           console.log(err);
+          reject(err);
         });
     });
   },
   getNextPage: function (token) {
     return new Promise((resolve, reject) => {
-      /*
-      googleMaps.placesNearby({
-          location: location,
-          radius: 5000,
-          //rankby: 'distance',
-          type: type
-        })
-        .asPromise()
-        .then((response) => {
-          if(response.json.status == 'OK'){
+      googleMaps.places({
+        pagetoken: token
+      })
+      .asPromise()
+      .then((response) => {
+        if(response.json.status == 'OK'){
+          var tokenNextPage = "";
+          if(response.json.next_page_token)
+            tokenNextPage = response.json.next_page_token;
 
-
-
-          } else {
-            resolve([]);
+          var returnValueActivities = []
+          response.json.results.forEach(el => {
+            if(el.types[0] != 'locality' && el.types[0] != 'colloquial_area' && el.types[0] != 'sublocality_level_1'){
+              returnValueActivities.push(el.place_id);
+            }
+          });
+          var returnValue = {
+            "results" : returnValueActivities,
+            "token" : tokenNextPage
           }
+          resolve(returnValue);
+        } else {
+          resolve([]);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        reject(err);
+      });
 
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-        */
     });
   },
+  /*
+  getRechName: function (token) {
+    return new Promise((resolve, reject) => {
+      googleMaps.placesQueryAutoComplete({
+        input: 'pizza near New York',
+        language: 'en',
+        location: [40.724, -74.013],
+        radius: 5000
+      })
+      .asPromise()
+      .then(function(response) {
+        var resp = response.json.predictions;
+        resp.forEach(el => {
+          console.log(el);
+        })
+        resolve(response);
+        /*
+        expect(response.json.predictions).toEqual(
+            arrayContaining([
+              objectContaining({
+                description: 'pizza near New York, NY, USA'
+              })
+            ]));
+      })
+      .catch((err) => {
+        console.log(err);
+        reject(err);
+      });
+    });
+  },*/
+
+
+
+
+
 };

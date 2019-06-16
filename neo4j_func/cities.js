@@ -146,7 +146,33 @@ module.exports = {
 
 
     })
-  }
+  },
+  createLinkUser: function (idUser, idCity) {
+    return new Promise((resolve, reject) => {
+
+      const resultPromise = session.run(
+        'Match (u:User),(c:City) Where ID(u) = '+ idUser +' AND ID(c) = ' + idCity + ' ' +
+        'Create (u)-[:AT]->(c) Return c',
+      );
+
+      resultPromise.then(result => {
+        const records = result.records;
+        var el = records[0].get(0);
+        var city = {
+          "id" : el.identity.low,
+          "name" : el.properties.name,
+          "country" : el.properties.country,
+          "place_id" : el.properties.place_id,
+          "location" : el.properties.location
+        }
+        resolve(city);
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+
+    })
+  },
 
 
 

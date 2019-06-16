@@ -1,6 +1,7 @@
 var session = require('../routes/databaseConnexion.js');
 var googleApi = require('../routes/google_api.js');
 var neo4jTag = require('./tag.js');
+var apiKey = 
 
 module.exports = {
   getNextEvent: function (idActivity) {
@@ -11,7 +12,9 @@ module.exports = {
       );
 
       resultPromise.then(result => {
+        console.log(result);
         const records = result.records;
+
         var el = records[0].get(0);
         var activity = records[0].get(1);
         var event = {

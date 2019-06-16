@@ -2,8 +2,29 @@ var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
 
-router.get('/:id', function(req, res, next) {
-  let id = req.params.id;
+// Auth User
+var currentUser;
+router.use(function (req, res, next) {
+  var token = req.headers['authorization'];
+  neo4jUser.findOneByTkn(token)
+  .then(user => {
+    if(user){
+      currentUser = user;
+      next();
+    }
+    else {
+      console.log("Erreur d'authentification !");
+      res.status(401).send("Erreur d'authentification !");
+    }
+  })
+  .catch( error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
+
+router.get('/', function(req, res, next) {
+  let id = currentUser.id;
 
   const resultPromise = session.run(
     'MATCH (u:User) -[l:FOLLOW]-> (otherNode:User) WHERE ID(u) = ' + id + ' RETURN otherNode',
@@ -27,12 +48,13 @@ router.get('/:id', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
 router.post('/', function(req, res, next) {
-  let id = req.body.id;
+  let id = currentUser.id;
   let idfollow = req.body.idfollow;
 
   const resultPromise = session.run(
@@ -60,12 +82,13 @@ router.post('/', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
 router.delete('/', function(req, res, next) {
-  let id = req.body.id;
+  let id = currentUser.id;
   let idfollow = req.body.idfollow;
 
   const resultPromise = session.run(
@@ -93,15 +116,9 @@ router.delete('/', function(req, res, next) {
 
     res.send(returnValue);
   }).catch( error => {
-    console.log(error);
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
-
-
-
-
-
-
-
 
 module.exports = router;

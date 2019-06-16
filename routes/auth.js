@@ -13,15 +13,22 @@ router.post('/login', function(req, res) {
     .then(result => {
       if(result){
         password = sha1(password + "toofarfar");
-        if(password == result.password)
-          res.send(result);
+        if(password == result.password){
+          var returnValue = {
+            "token" : result.token
+          }
+
+          res.send(returnValue);
+        }
         else
           res.status(500).send("Mail and password not valid");
+
       }
       else
         res.status(500).send("User not found");
     })
     .catch(error => {
+      console.log(error);
       res.status(500).send(error);
     });
   else

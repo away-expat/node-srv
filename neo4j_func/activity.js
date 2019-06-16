@@ -1,6 +1,7 @@
 var session = require('../routes/databaseConnexion.js');
 var googleApi = require('../routes/google_api.js');
 var neo4jTag = require('./tag.js');
+var apiKey =
 
 module.exports = {
   getByGoogleId: function (id) {
@@ -265,7 +266,6 @@ module.exports = {
           }
           returnValue.push(activity);
         });
-
         resolve(returnValue);
 
       }).catch( error => {

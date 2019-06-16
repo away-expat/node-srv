@@ -40,3 +40,37 @@
                 ]));
           })
           .then(done, fail);
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+router.get('/testGoogleDetail/:tkn', function(req, res, next) {
+  var tkn = req.params.tkn;
+
+  googleApi.getDetail(tkn)
+  .then(result => {
+    console.log(result);
+    res.send(result)
+  }).catch(error => {
+    res.status(500).send(error);
+    console.log(error);
+  });
+
+});
+
+router.get('/testGoogleNameCity/:city', function(req, res, next) {
+  var city = req.params.city;
+
+  googleApi.getByName(city)
+  .then(result => {
+    var cityFromGoogle = result;
+
+    res.send(result)
+  }).catch(error => {
+    res.status(500).send(error);
+    console.log(error);
+  });
+
+});
