@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
+var neo4jUser = require('../neo4j_func/user.js');
 
 // Auth User
 var currentUser;

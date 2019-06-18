@@ -29,6 +29,33 @@ module.exports = {
       });
     })
   },
+  getByNeoId: function (id) {
+    return new Promise((resolve, reject) => {
+      const resultPromise = session.run(
+        'Match (c:City) Where ID(c) = ' + id + ' Return c',
+      );
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue;
+        records.forEach((element) => {
+          var el = element.get(0);
+          var city = {
+            "id" : el.identity.low,
+            "name" : el.properties.name,
+            "country" : el.properties.country,
+            "place_id" : el.properties.place_id,
+            "location" : el.properties.location
+          }
+          returnValue = city;
+        });
+
+        resolve(returnValue);
+      }).catch( error => {
+        console.log(error);
+        reject(error);
+      });
+    })
+  },
   create: function (name, country, place_id, location) {
     return new Promise((resolve, reject) => {
       const resultPromise = session.run(
@@ -83,8 +110,6 @@ module.exports = {
         console.log(error);
         reject(error);
       });
-
-
 
     })
   },

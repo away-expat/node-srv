@@ -1,12 +1,16 @@
 var express = require('express');
 var passport = require('passport');
 var neo4jUser = require('../neo4j_func/user.js');
+var sha1 = require('sha1');
 
 var router = express.Router();
 
 router.post('/login', function(req, res) {
   var mail = req.body.mail;
   var password = req.body.password;
+
+  console.log(mail);
+  console.log(password);
 
   if(mail && password)
     neo4jUser.findOne(mail)

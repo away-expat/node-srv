@@ -57,7 +57,10 @@ router.post('/', function(req, res, next) {
           .then(c => {
             if(c){
               user.at = c;
-              res.send(user);
+              var returnValue = {
+                "token" : user.token,
+              };
+              res.send(returnValue);
             } else {
               console.log('Error : Creation Link At City');
               res.status(500).send('Error : Creation Link At City');
@@ -107,12 +110,55 @@ router.use(function (req, res, next) {
     res.status(500).send('Error : ' + error);
   });
 });
-/*
+
+router.get('/userInfo', function(req, res, next) {
+  let id = currentUser.id
+
+  if(id){
+    const resultPromise = session.run(
+      'MATCH (n :User)-[:AT]->(c :City) WHERE ID(n) = ' + id + ' RETURN n,c',
+    );
+
+    resultPromise.then(result => {
+      const records = result.records;
+      var el = records[0].get(0);
+      var c = records[0].get(1);
+
+      var city = {
+        "id" : c.identity.low,
+        "name" : c.properties.name,
+        "country" : c.properties.country,
+        "place_id" : c.properties.place_id,
+        "location" : c.properties.location
+      }
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "mail" : el.properties.mail,
+        "country" : el.properties.country,
+        "birth" : el.properties.birth,
+        "token" :  el.properties.token
+      }
+      user.at = city;
+
+      res.send(user);
+    })
+    .catch(error => {
+      console.log('Error : ' + error);
+      res.status(500).send('Error : ' + error);
+    });
+
+  } else {
+    console.log("Un des champs n'est pas valide !");
+    res.status(500).send("Un des champs n'est pas valide !");
+  }
+});
+
+// A Delete
 router.get('/', function(req, res, next) {
-  var t = 'Match (n:User)';
-  t += ' RETURN n';
   const resultPromise = session.run(
-    'Match (n:User)'
+    'MATCH (n :User) RETURN n',
   );
 
   resultPromise.then(result => {
@@ -127,16 +173,34 @@ router.get('/', function(req, res, next) {
         "mail" : el.properties.mail,
         "country" : el.properties.country,
         "birth" : el.properties.birth,
+        "token" :  el.properties.token
       }
       returnValue.push(user);
-    });
+
+    })
+
+    /*
+    var c = records[0].get(1);
+
+    var city = {
+      "id" : c.identity.low,
+      "name" : c.properties.name,
+      "country" : c.properties.country,
+      "place_id" : c.properties.place_id,
+      "location" : c.properties.location
+    }*/
+
+    //user.at = city;
 
     res.send(returnValue);
-  }).catch( error => {
-    console.log(error);
+  })
+  .catch(error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
+
 });
-*/
+
 router.get('/:id', function(req, res, next) {
   let id = req.params.id
 

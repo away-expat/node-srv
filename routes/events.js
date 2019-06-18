@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
-var apiKey =
+var apiKey = 
+var neo4jUser = require('../neo4j_func/user.js');
+var dateFormat = require('dateformat');
 
 // Auth User
 var currentUser;
@@ -113,7 +115,8 @@ router.post('/', function(req, res, next) {
 
     res.send(returnValue);
 
-  }).catch( error => {
+  })
+  .catch( error => {
     console.log('Error : ' + error);
     res.status(500).send('Error : ' + error);
   });
@@ -198,8 +201,9 @@ router.get('/getEventWithDetails/:id', function(req, res, next) {
 
 router.get('/getEventsByActivity/:id', function(req, res, next) {
   let id = req.params.id;
+  var day = dateFormat(new Date(), "yyyy-mm-dd");
   const resultPromise = session.run(
-    'MATCH (e: Event)-[:INSTANCE]->(a:Activity) WHERE ID(a) = ' + id + ' RETURN e',
+    'MATCH (e: Event)-[:INSTANCE]->(a:Activity) WHERE ID(a) = ' + id + ' AND e.date >= "' + day + '" RETURN e ORDER BY e.date',
   );
 
   resultPromise.then(result => {
@@ -233,9 +237,15 @@ router.get('/getAttendeesByEvent/:id', function(req, res, next) {
     console.log(records);
     var returnValue = [];
     records.forEach(function(element){
-      returnValue.push(element.get(0).properties);
+      var el = element.get(0);
+      var user = {
+        "id" : el.identity.low,
+        "firstname" : el.properties.firstname,
+        "lastname" : el.properties.lastname,
+        "country" : el.properties.country
+      }
+      returnValue.push(user);
     });
-
     res.send(returnValue);
   }).catch( error => {
     console.log('Error : ' + error);
@@ -247,67 +257,96 @@ router.post('/postParticipateAtEvent', function(req, res, next) {
   let idEvent = req.body.idEvent;
   let idUser = currentUser.id;
 
-  const resultPromise = session.run(
-    'MATCH (e:Event)-[:INSTANCE]->(a :Activity),(u:User) ' +
-    'WHERE ID(e) = ' + idEvent + ' AND ID(u) = ' + idUser + ' ' +
-    'CREATE (u)-[r:TAKEPART]->(e) ' +
-    'RETURN e,a'
-  );
+  neo4jEvent.canIChangeMyMind(idEvent)
+  .then(results => {
+    if(results){
+      const resultPromise = session.run(
+        'MATCH (e:Event)-[:INSTANCE]->(a :Activity),(u:User) ' +
+        'WHERE ID(e) = ' + idEvent + ' AND ID(u) = ' + idUser + ' ' +
+        'CREATE (u)-[r:TAKEPART]->(e) ' +
+        'RETURN e,a'
+      );
 
-  resultPromise.then(result => {
-    const records = result.records;
-    var returnValue;
-    records.forEach(function(element){
-      var el = element.get(0);
-      var activity = element.get(1);
-      var event = {
-        "id" : el.identity.low,
-        "date" : el.properties.date,
-        "description" : el.properties.description,
-        "activityName" : activity.properties.name,
-        "activityId" : activity.identity.low,
-      }
-      returnValue = event;
-    });
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue;
+        records.forEach(function(element){
+          var el = element.get(0);
+          var activity = element.get(1);
+          var event = {
+            "id" : el.identity.low,
+            "date" : el.properties.date,
+            "description" : el.properties.description,
+            "activityName" : activity.properties.name,
+            "activityId" : activity.identity.low,
+          }
+          returnValue = event;
+        });
 
-    res.send(returnValue);
+        res.send(returnValue);
 
-  }).catch( error => {
+      }).catch( error => {
+        console.log('Error : ' + error);
+        res.status(500).send('Error : ' + error);
+      });
+    } else {
+      console.log("La date est dépassée, vous ne pouvez modifier votre participation à l'evenement");
+      res.status(403).send("La date est dépassée, vous ne pouvez modifier votre participation à l'evenement");
+    }
+
+  })
+  .catch(error => {
     console.log('Error : ' + error);
     res.status(500).send('Error : ' + error);
   });
+
+
 });
 
 router.delete('/deleteParticipationAtEvent', function(req, res, next) {
   let idEvent = req.body.idEvent;
   let idUser = currentUser.id;
 
-  const resultPromise = session.run(
-    'MATCH (u:User)-[r:TAKEPART]->(e:Event)-[:INSTANCE]->(a :Activity)' +
-    'WHERE ID(e) = ' + idEvent + ' AND ID(u) = ' + idUser + ' ' +
-    'DELETE r ' +
-    'RETURN e,a'
-  );
 
-  resultPromise.then(result => {
-    const records = result.records;
-    var returnValue;
-    records.forEach(function(element){
-      var el = element.get(0);
-      var activity = element.get(1);
-      var event = {
-        "id" : el.identity.low,
-        "date" : el.properties.date,
-        "description" : el.properties.description,
-        "activityName" : activity.properties.name,
-        "activityId" : activity.identity.low,
-      }
-      returnValue = event;
-    });
+  neo4jEvent.canIChangeMyMind(idEvent)
+  .then(results => {
+    if(results){
+      const resultPromise = session.run(
+        'MATCH (u:User)-[r:TAKEPART]->(e:Event)-[:INSTANCE]->(a :Activity)' +
+        'WHERE ID(e) = ' + idEvent + ' AND ID(u) = ' + idUser + ' ' +
+        'DELETE r ' +
+        'RETURN e,a'
+      );
 
-    res.send(returnValue);
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue;
+        records.forEach(function(element){
+          var el = element.get(0);
+          var activity = element.get(1);
+          var event = {
+            "id" : el.identity.low,
+            "date" : el.properties.date,
+            "description" : el.properties.description,
+            "activityName" : activity.properties.name,
+            "activityId" : activity.identity.low,
+          }
+          returnValue = event;
+        });
 
-  }).catch( error => {
+        res.send(returnValue);
+
+      }).catch( error => {
+        console.log('Error : ' + error);
+        res.status(500).send('Error : ' + error);
+      });
+    } else {
+      console.log("La date est dépassée, vous ne pouvez modifier votre participation à l'evenement");
+      res.status(403).send("La date est dépassée, vous ne pouvez modifier votre participation à l'evenement");
+    }
+
+  })
+  .catch(error => {
     console.log('Error : ' + error);
     res.status(500).send('Error : ' + error);
   });

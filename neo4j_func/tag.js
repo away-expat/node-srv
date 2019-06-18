@@ -98,30 +98,47 @@ module.exports = {
   createLink: function (idActivity, idTag) {
     return new Promise((resolve, reject) => {
 
-      const resultPromise = session.run(
-        'Match (t:Tag),(a:Activity) Where ID(t) = '+ idTag +' AND ID(a) = ' + idActivity + ' ' +
-        'Create (a)-[:TYPE]->(t) Return t',
+      const resultPromiseCheck = session.run(
+        'Match (a:Activity)-[l:TYPE]->(t:Tag) Where ID(t) = '+ idTag +' AND ID(a) = ' + idActivity + ' ' +
+        'Return l',
       );
 
-      resultPromise.then(result => {
-        const records = result.records;
-        var returnValue;
-        records.forEach((element) => {
-          var el = element.get(0);
-          var tag = {
-            "id" : el.identity.low,
-            "name" : el.properties.name
-          }
-          returnValue = tag;
-        });
+      resultPromiseCheck.then(resultCheck => {
+        const recordsCheck = resultCheck.records.length;
+        if(recordsCheck == 0){
 
-        resolve(returnValue);
+          const resultPromise = session.run(
+            'Match (t:Tag),(a:Activity) Where ID(t) = '+ idTag +' AND ID(a) = ' + idActivity + ' ' +
+            'Create (a)-[:TYPE]->(t) Return t',
+          );
+
+          resultPromise.then(result => {
+            const records = result.records;
+            var returnValue;
+            records.forEach((element) => {
+              var el = element.get(0);
+              var tag = {
+                "id" : el.identity.low,
+                "name" : el.properties.name
+              }
+              returnValue = tag;
+            });
+
+            resolve(returnValue);
+
+          }).catch( error => {
+            console.log(error);
+            reject(error);
+          });
+
+
+        }
+        resolve([]);
 
       }).catch( error => {
         console.log(error);
         reject(error);
       });
-
 
     })
   },

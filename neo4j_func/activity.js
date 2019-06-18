@@ -1,7 +1,7 @@
 var session = require('../routes/databaseConnexion.js');
 var googleApi = require('../routes/google_api.js');
 var neo4jTag = require('./tag.js');
-var apiKey =
+var apiKey = 
 
 module.exports = {
   getByGoogleId: function (id) {

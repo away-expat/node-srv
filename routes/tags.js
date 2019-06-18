@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var session = require('./databaseConnexion.js');
+var neo4jUser = require('../neo4j_func/user.js');
 
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
@@ -48,7 +49,6 @@ router.use(function (req, res, next) {
 
 router.post('/', function(req, res, next) {
   let name = req.body.name;
-  console.log(name);
 
   const resultPromise = session.run(
     'CREATE (n :Tag {name: "' + name + '"}) RETURN n'
@@ -73,7 +73,60 @@ router.post('/', function(req, res, next) {
   });
 });
 
+router.post('/like/:id', function(req, res, next) {
+  let idTag = req.params.id;
+  let idUser = currentUser.id;
 
+  const resultPromiseCheck = session.run(
+    'Match (u:User)-[l:LIKE]->(t:Tag) Where ID(u) = ' + idUser + ' And ID(t) = ' + idTag + ' Return l'
+  );
+
+  resultPromiseCheck.then(resultCheck => {
+    const recordsCheck = resultCheck.records.length;
+    if(recordsCheck > 0){
+      res.send("Already Existe");
+    } else {
+      const resultPromise = session.run(
+        'Match (u:User),(t:Tag) Where ID(u) = ' + idUser + ' And ID(t) = ' + idTag +
+        ' Create (u)-[:LIKE]->(t) Return t'
+      );
+
+      resultPromise.then(result => {
+        const records =  result.records[0].get(0);
+        console.log(records);
+        var tag = {
+          "id" : records.identity.low,
+          "name" : records.properties.name,
+        }
+        res.send(tag);
+
+      }).catch( error => {
+        console.log('Error : ' + error);
+        res.status(500).send('Error : ' + error);
+      });
+    }
+  }).catch( error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
+
+router.delete('/dislike/:id', function(req, res, next) {
+  let idTag = req.params.id;
+  let idUser = currentUser.id;
+
+  const resultPromise = session.run(
+    'Match (u:User)-[l:LIKE]->(t:Tag) Where ID(u) = ' + idUser + ' And ID(t) = ' + idTag + ' Delete l'
+  );
+
+  resultPromise.then(result => {
+    console.log(result);
+    res.send([]);
+  }).catch( error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
 
 
 module.exports = router;

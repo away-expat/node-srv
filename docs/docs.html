@@ -79,6 +79,38 @@
     </style>
   </head>
   <body>
+
+    <!-- ********************************
+
+                  Auth
+
+    ********************************** -->
+    <h2>Auth</h2>
+
+    <div class="title-div" onclick="showDiv('auth/login');">
+      <p class="route"><span class="method">POST</span> /auth/login</p>
+      <p class="description">Natif Login</p>
+    </div>
+    <div class="definition-div" id="auth/login">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> mail</li>
+       <li><span class="type">[string]</span> password</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> token</li>
+      </ul>
+    </div>
+
     <!-- ********************************
 
                   Users
@@ -94,7 +126,7 @@
     <div class="definition-div" id="getUsers">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -112,7 +144,7 @@
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
         <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
       </ul>
     </div>
 
@@ -123,7 +155,7 @@
     <div class="definition-div" id="getUser">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -140,7 +172,35 @@
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
         <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('userInfo');">
+      <p class="route"><span class="method">GET</span> /userInfo</p>
+      <p class="description">Get info current user.</p>
+    </div>
+    <div class="definition-div" id="userInfo">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> mail</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[int]</span> birth</li>
       </ul>
     </div>
 
@@ -162,19 +222,14 @@
         <li><span class="type">[string]</span> firstname</li>
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
         <li><span class="type">[string]</span> country (Origin)</li>
         <li><span class="type">[int]</span> password</li>
         <li><span class="type">[int]</span> idCountry (Follow)</li>
       </ul>
       <h3>Return :</h3>
       <ul class="list-param">
-        <li><span class="type">[int]</span> id</li>
-        <li><span class="type">[string]</span> firstname</li>
-        <li><span class="type">[string]</span> lastname</li>
-        <li><span class="type">[string]</span> mail</li>
-        <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[string]</span> token</li>
       </ul>
     </div>
 
@@ -185,7 +240,7 @@
     <div class="definition-div" id="updateAccount">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -197,7 +252,7 @@
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
         <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
       </ul>
       <h3>Return :</h3>
       <ul class="list-param">
@@ -206,7 +261,7 @@
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
         <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
       </ul>
     </div>
 
@@ -217,7 +272,7 @@
     <div class="definition-div" id="updateUserCity">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -225,7 +280,6 @@
       </ul>
       <h3>Body :</h3>
       <ul class="list-param">
-        <li><span class="type">[int]</span> id (User)</li>
 		    <li><span class="type">[int]</span> idCity (City)</li>
       </ul>
       <h3>Return :</h3>
@@ -235,7 +289,7 @@
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
         <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
       </ul>
     </div>
 
@@ -246,7 +300,7 @@
     <div class="definition-div" id="deleteAccount">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -254,7 +308,7 @@
       </ul>
       <h3>Body :</h3>
       <ul class="list-param">
-        <li><span class="type">[int]</span> id</li>
+        <li><span class="type"></span> none</li>
       </ul>
       <h3>Return :</h3>
       <ul class="list-param">
@@ -263,9 +317,100 @@
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
         <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
       </ul>
     </div>
+
+    <!-- ********************************
+
+                  City
+
+    ********************************** -->
+    <h2>City</h2>
+    <p class="route">Add /cities before</p>
+
+    <div class="title-div" onclick="showDiv('getCities');">
+      <p class="route"><span class="method">GET</span> /</p>
+      <p class="description">Get city from Neo4J.</p>
+    </div>
+    <div class="definition-div" id="getCities">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of object like : 
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[int]</span> location</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('getCity');">
+      <p class="route"><span class="method">GET</span> /{id}</p>
+      <p class="description">Get city by id Neo4J.</p>
+    </div>
+    <div class="definition-div" id="getCity">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (City)</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[int]</span> location</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('getCityByName');">
+      <p class="route"><span class="method">GET</span> /getCityByName/:name</p>
+      <p class="description">Get city with creation if not existe</p>
+    </div>
+    <div class="definition-div" id="getCityByName">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> name</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[int]</span> location</li>
+      </ul>
+    </div>
+
 
     <!-- ********************************
 
@@ -282,7 +427,7 @@
     <div class="definition-div" id="getAllActivities">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -312,7 +457,7 @@
     <div class="definition-div" id="getActivity">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -341,11 +486,11 @@
     <div class="definition-div" id="ByCity">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
-        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[int]</span> id (City)</li>
       </ul>
       <h3>Body :</h3>
       <ul class="list-param">
@@ -364,6 +509,64 @@
       </ul>
     </div>
 
+    <div class="title-div" onclick="showDiv('ByTag');">
+      <p class="route"><span class="method">GET</span> /ByTag/{id}</p>
+      <p class="description">Get all activities for country.</p>
+    </div>
+    <div class="definition-div" id="ByTag">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (Tag)</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> address</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[float]</span> rating</li>
+        <li><span class="type">[string]</span> url</li>
+        <li><span class="type">[string]</span> photos</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('suggestion');">
+      <p class="route"><span class="method">GET</span> /suggestion</p>
+      <p class="description">Get suggestion.</p>
+    </div>
+    <div class="definition-div" id="suggestion">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> date</li>
+        <li><span class="type">[string]</span> description</li>
+        <li><span class="type">[string]</span> activityName</li>
+        <li><span class="type">[int]</span> activityId</li>
+      </ul>
+    </div>
+
     <div class="title-div" onclick="showDiv('googleByCity');">
       <p class="route"><span class="method">GET</span> /googleByCity/{city}/{option}</p>
       <p class="description">Get all activities.</p>
@@ -371,7 +574,7 @@
     <div class="definition-div" id="googleByCity">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -402,12 +605,42 @@
     <div class="definition-div" id="googleByLocation">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
         <li><span class="type">[string]</span> location</li>
         <li><span class="type">[string]</span> option (Optional)</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> address</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[float]</span> rating</li>
+        <li><span class="type">[string]</span> url</li>
+        <li><span class="type">[string]</span> photos</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('googleGetNextPage');">
+      <p class="route"><span class="method">GET</span> /googleGetNextPage/{token}</p>
+      <p class="description">Get all activities.</p>
+    </div>
+    <div class="definition-div" id="googleGetNextPage">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> token (NextPage)</li>
       </ul>
       <h3>Body :</h3>
       <ul class="list-param">
@@ -443,7 +676,7 @@
     <div class="definition-div" id="getEvents">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -471,7 +704,7 @@
     <div class="definition-div" id="getEvent">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -498,7 +731,7 @@
     <div class="definition-div" id="getEventsByActivity">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -524,7 +757,7 @@
     <div class="definition-div" id="postEvent">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -533,7 +766,6 @@
       <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[int]</span> idActivity</li>
-        <li><span class="type">[int]</span> idUser</li>
         <li><span class="type">[string]</span> date</li>
         <li><span class="type">[string]</span> description</li>
       </ul>
@@ -548,6 +780,33 @@
       </ul>
     </div>
 
+    <div class="title-div" onclick="showDiv('getAttendeesByEvent');">
+      <p class="route"><span class="method">POST</span> /getAttendeesByEvent/{id}</p>
+      <p class="description">Participate to Event.</p>
+    </div>
+    <div class="definition-div" id="getAttendeesByEvent">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (Event</li>
+      </ul>
+      <h3>Return :</h3>
+      Liste of User how participate at the event
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> lastname</li>
+        <li><span class="type">[string]</span> firstname</li>
+        <li><span class="type">[string]</span> country</li>
+      </ul>
+    </div>
+
     <div class="title-div" onclick="showDiv('postParticipateAtEvent');">
       <p class="route"><span class="method">POST</span> /postParticipateAtEvent</p>
       <p class="description">Participate to Event.</p>
@@ -555,7 +814,7 @@
     <div class="definition-div" id="postParticipateAtEvent">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -564,7 +823,6 @@
       <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[int]</span> idEvent</li>
-        <li><span class="type">[int]</span> idUser</li>
       </ul>
       <h3>Return :</h3>
       Event choiced
@@ -584,7 +842,7 @@
     <div class="definition-div" id="deleteParticipationAtEvent">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -593,7 +851,6 @@
       <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[int]</span> idEvent</li>
-        <li><span class="type">[int]</span> idUser</li>
       </ul>
       <h3>Return :</h3>
       Event choiced
@@ -605,6 +862,8 @@
         <li><span class="type">[int]</span> activityId</li>
       </ul>
     </div>
+
+
 
     <!-- ********************************
 
@@ -621,7 +880,7 @@
     <div class="definition-div" id="getTags">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -646,7 +905,7 @@
     <div class="definition-div" id="createTag">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -655,6 +914,54 @@
       <h3>Body :</h3>
       <ul class="list-param">
         <li><span class="type">[string]</span> name</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('/like');">
+      <p class="route"><span class="method">POST</span> /like/:id</p>
+      <p class="description">Like tag</p>
+    </div>
+    <div class="definition-div" id="/like">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (Tag)</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('/dislike');">
+      <p class="route"><span class="method">DELETE</span> /dislike/:id</p>
+      <p class="description">Dislike tag</p>
+    </div>
+    <div class="definition-div" id="/dislike">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id (Tag)</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
       </ul>
       <h3>Return :</h3>
       <ul class="list-param">
@@ -678,7 +985,7 @@
     <div class="definition-div" id="getFollowByUser">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -696,7 +1003,7 @@
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
         <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
       </ul>
     </div>
 
@@ -707,7 +1014,7 @@
     <div class="definition-div" id="postFollowUser">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -726,7 +1033,7 @@
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
         <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
       </ul>
     </div>
 
@@ -737,7 +1044,7 @@
     <div class="definition-div" id="deleteFollowUser">
       <h3>Header :</h3>
       <ul class="list-param">
-        <li><span class="type"></span> none</li>
+        <li><span class="type">[Authorization]</span> token</li>
       </ul>
       <h3>Parameters :</h3>
       <ul class="list-param">
@@ -756,7 +1063,7 @@
         <li><span class="type">[string]</span> lastname</li>
         <li><span class="type">[string]</span> mail</li>
         <li><span class="type">[string]</span> country</li>
-        <li><span class="type">[int]</span> age</li>
+        <li><span class="type">[int]</span> birth</li>
       </ul>
     </div>
 

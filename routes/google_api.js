@@ -174,6 +174,44 @@ module.exports = {
 
     });
   },
+  rechByName : function(name, location, type){
+    return new Promise((resolve, reject) => {
+      googleMaps.places({
+        query: name,
+        language: 'fr',
+        location: location,
+        type: type,
+        radius: 5000
+      })
+      .asPromise()
+      .then((response) => {
+
+        if(response.json.status == 'OK'){
+          var tokenNextPage = "";
+          if(response.json.next_page_token)
+            tokenNextPage = response.json.next_page_token;
+
+          var returnValueActivities = []
+          response.json.results.forEach(el => {
+            if(el.types[0] != 'locality' && el.types[0] != 'colloquial_area' && el.types[0] != 'sublocality_level_1'){
+              returnValueActivities.push(el.place_id);
+            }
+          });
+          var returnValue = {
+            "results" : returnValueActivities,
+            "token" : tokenNextPage
+          }
+          resolve(returnValue);
+        } else {
+          resolve([]);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        reject(err);
+      });
+    });
+  },
   /*
   getRechName: function (token) {
     return new Promise((resolve, reject) => {
