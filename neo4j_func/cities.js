@@ -191,13 +191,50 @@ module.exports = {
           "location" : el.properties.location
         }
         resolve(city);
-      }).catch(error => {
+      })
+      .catch(error => {
         console.log(error);
         reject(error);
       });
 
     })
   },
+  autocompleteNameCity: function(name) {
+    return new Promise((resolve, reject) => {
+      googleApi.rechNameCity(name)
+      .then(resultPrediction => {
+        var length = resultPrediction.length;
+        var resultArray = []
+        resultPrediction.forEach(el => {
+          
+          googleApi.getByName(el)
+          .then(reusltDetail => {
+
+            this.createIfDoNotExiste(reusltDetail)
+            .then(city => {
+              resultArray.push(city);
+              if(resultArray.length == length)
+                resolve(resultArray);
+            })
+            .catch((error) => {
+              console.log(error);
+              reject(error);
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+            reject(error);
+          });
+        })
+
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
 
 
 

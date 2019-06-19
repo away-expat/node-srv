@@ -411,6 +411,34 @@
       </ul>
     </div>
 
+    <div class="title-div" onclick="showDiv('autoCompleteCityName');">
+      <p class="route"><span class="method">GET</span> /autoCompleteCityName/:name</p>
+      <p class="description">Get city with creation if not existe, autocomplete</p>
+    </div>
+    <div class="definition-div" id="autoCompleteCityName">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> name</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        Array of objet like : 
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> country</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[int]</span> location</li>
+      </ul>
+    </div>
+
 
     <!-- ********************************
 
@@ -462,6 +490,35 @@
       <h3>Parameters :</h3>
       <ul class="list-param">
         <li><span class="type">[int]</span> id</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+        <li><span class="type">[string]</span> address</li>
+        <li><span class="type">[string]</span> place_id</li>
+        <li><span class="type">[float]</span> rating</li>
+        <li><span class="type">[string]</span> url</li>
+        <li><span class="type">[string]</span> photos</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('nameRch');">
+      <p class="route"><span class="method">GET</span> /nameRch/{name}</p>
+      <p class="description">Get one activities.</p>
+    </div>
+    <div class="definition-div" id="nameRch">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type">[string]</span> name</li>
       </ul>
       <h3>Body :</h3>
       <ul class="list-param">
@@ -878,6 +935,31 @@
       <p class="description">Get all tags.</p>
     </div>
     <div class="definition-div" id="getTags">
+      <h3>Header :</h3>
+      <ul class="list-param">
+        <li><span class="type">[Authorization]</span> token</li>
+      </ul>
+      <h3>Parameters :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Body :</h3>
+      <ul class="list-param">
+        <li><span class="type"></span> none</li>
+      </ul>
+      <h3>Return :</h3>
+      Array of objects like:
+      <ul class="list-param">
+        <li><span class="type">[int]</span> id</li>
+        <li><span class="type">[string]</span> name</li>
+      </ul>
+    </div>
+
+    <div class="title-div" onclick="showDiv('ofUser');">
+      <p class="route"><span class="method">GET</span> /ofUser</p>
+      <p class="description">Get all tags fo user.</p>
+    </div>
+    <div class="definition-div" id="ofUser">
       <h3>Header :</h3>
       <ul class="list-param">
         <li><span class="type">[Authorization]</span> token</li>

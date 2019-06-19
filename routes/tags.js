@@ -47,6 +47,30 @@ router.use(function (req, res, next) {
   });
 });
 
+router.get('/ofUser', function(req, res, next) {
+  var id = currentUser.id;
+  const resultPromise = session.run(
+    'MATCH (n :Tag)<-[:LIKE]-(u:User) Where ID(u) = ' + id + ' RETURN n',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      var el = element.get(0);
+      var tag = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+      }
+      returnValue.push(tag);
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
 router.post('/', function(req, res, next) {
   let name = req.body.name;
 
@@ -93,7 +117,6 @@ router.post('/like/:id', function(req, res, next) {
 
       resultPromise.then(result => {
         const records =  result.records[0].get(0);
-        console.log(records);
         var tag = {
           "id" : records.identity.low,
           "name" : records.properties.name,

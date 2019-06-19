@@ -14,40 +14,10 @@ var apiKey =
 var dateFormat = require('dateformat');
 
 router.get('/test', function(req, res, next) {
-  neo4jEvent.canIChangeMyMind(606)
-  .then(results => {
-    res.send(results);
-  })
-  .catch(error => {
-    console.log('Error : ' + error);
-    res.status(500).send('Error : ' + error);
-  });
-  /*
-  var day = dateFormat(new Date(), "yyyy-mm-dd");
-  console.log(day);
-  var strDate = "";
-  const resultPromise = session.run(
-    'MATCH (n:User) Where n.birth >= "1994-05-03" RETURN n ORDER BY n.birth',
-  );
 
-  resultPromise.then(result => {
-    const records = result.records;
-    var resultArray = [];
-    //console.log(records);
-    records.forEach(element => {
-      var el = element.get(0);
-      el = el.properties.birth;
-      resultArray.push(el);
-      //console.log(el);
-    })
-
-    res.send(resultArray);
-  }).catch( error => {
-    console.log(error);
-  });*/
 });
 
-/*
+
 // Auth User
 var currentUser;
 router.use(function (req, res, next) {
@@ -56,7 +26,6 @@ router.use(function (req, res, next) {
   .then(user => {
     if(user){
       currentUser = user;
-      console.log(user);
       next();
     }
     else {
@@ -69,84 +38,88 @@ router.use(function (req, res, next) {
     res.status(500).send('Error : ' + error);
   });
 });
-*/
 
-router.get('/nameRch/:name/', function(req, res, next) {
+router.get('/nameRch/:name/:option?', function(req, res, next) {
   var name = req.params.name;
-  var location = '48.8488653,2.4290513';
+  var location = currentUser.at.location;
+  var option = req.params.option;
 
-  googleApi.rechByName(name, location)
+  if (!option)
+    option = '';
+
+  googleApi.rechByName(name, location, option)
   .then(resultActivity => {
 
     neo4jActivity.createIfDoNotExiste(resultActivity.results, -1)
     .then(activityArray => {
-      var tagArray = [];
-      var cityArray = [];
+      if(activityArray){
+        var tagArray = [];
+        var cityArray = [];
 
-      activityArray.forEach(activity => {
-        if(activity.type){
-          activity.type = activity.type.split(',');
-          activity.type.forEach(tag => {
-            if(tagArray.indexOf(tag) == -1)
-              tagArray.push(tag);
-          })
-        }
-        if(cityArray.indexOf(activity.city) == -1)
-          cityArray.push(activity.city);
-      })
-
-      neo4jTag.createMultyTag(tagArray)
-      .then(tagResult => {
         activityArray.forEach(activity => {
-          if(activity.type)
-            tagResult.forEach(tag => {
-              if(activity.type.indexOf(tag.name) != -1){
+          if(activity.type){
+            activity.type = activity.type.split(',');
+            activity.type.forEach(tag => {
+              if(tagArray.indexOf(tag) == -1)
+                tagArray.push(tag);
+            })
+          }
+          if(cityArray.indexOf(activity.city) == -1 && activity.city)
+            cityArray.push(activity.city);
+        })
 
-                neo4jTag.createLink(activity.id, tag.id)
+        neo4jTag.createMultyTag(tagArray)
+        .then(tagResult => {
+          activityArray.forEach(activity => {
+            if(activity.type)
+              tagResult.forEach(tag => {
+                if(activity.type.indexOf(tag.name) != -1){
+
+                  neo4jTag.createLink(activity.id, tag.id)
+                  .catch( error => {
+                    console.log('Error 6: ' + error);
+                    res.status(500).send('Error : ' + error);
+                  });
+                }
+              })
+          })
+        })
+        .catch(error => {
+          console.log('Error 5: ' + error);
+          res.status(500).send('Error : ' + error);
+        });
+        neo4jCity.createMultyCity(cityArray)
+        .then(cityResult => {
+          activityArray.forEach(activity => {
+            cityResult.forEach(city => {
+              tmpCity = city.name + " " + city.country;
+              if(activity.city == tmpCity){
+                neo4jCity.createLink(activity.id, city.id)
                 .catch( error => {
-                  console.log('Error : ' + error);
+                  console.log('Error 4: ' + error);
                   res.status(500).send('Error : ' + error);
                 });
               }
             })
-        })
-      })
-      .catch(error => {
-        console.log('Error : ' + error);
-        res.status(500).send('Error : ' + error);
-      });
-
-      neo4jCity.createMultyCity(cityArray)
-      .then(cityResult => {
-        activityArray.forEach(activity => {
-          cityResult.forEach(city => {
-            tmpCity = city.name + " " + city.country;
-            if(activity.city == tmpCity){
-              neo4jCity.createLink(activity.id, city.id)
-              .catch( error => {
-                console.log('Error : ' + error);
-                res.status(500).send('Error : ' + error);
-              });
-            }
           })
+
         })
+        .catch(error => {
+          console.log('Error 3: ' + error);
+          res.status(500).send('Error : ' + error);
+        });
 
-      })
-      .catch(error => {
-        console.log('Error : ' + error);
-        res.status(500).send('Error : ' + error);
-      });
-
-      res.send(activityArray);
-
+        res.send(activityArray);
+      } else
+        res.send([]);
     })
     .catch(error => {
-      console.log('Error : ' + error);
+      console.log('Error 2: ' + error);
       res.status(500).send('Error : ' + error);
     });
   })
   .catch(error => {
-    console.log('Error : ' + error);
+    console.log('Error 1: ' + error);
     res.status(500).send('Error : ' + error);
   });
 
@@ -258,6 +231,17 @@ router.get('/googleByCity/:city/:option?', function(req, res, next) {
 
   if (!option)
     option = '';
+
+  if(option){
+    neo4jTag.userSee(currentUser.id, option)
+    .then(r => {
+      console.log("link see to " + option + " fait !");
+    })
+    .catch( error => {
+      console.log('Error : ' + error);
+      res.status(500).send('Error : ' + error);
+    });
+  }
 
   googleApi.getByName(city)
   .then(result => {
@@ -434,7 +418,6 @@ router.get('/suggestion', function(req, res, next) {
           var numberOfEvent = 0;
           activities.forEach(activity => {
             if(limite < 5){
-              console.log(activity.id);
               neo4jEvent.getNextEvent(activity.id)
               .then(event => {
                 if(event)

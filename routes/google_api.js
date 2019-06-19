@@ -212,36 +212,33 @@ module.exports = {
       });
     });
   },
-  /*
-  getRechName: function (token) {
+  rechNameCity: function(name) {
     return new Promise((resolve, reject) => {
       googleMaps.placesQueryAutoComplete({
-        input: 'pizza near New York',
-        language: 'en',
-        location: [40.724, -74.013],
-        radius: 5000
+        input: name,
+        language: 'fr',
       })
       .asPromise()
       .then(function(response) {
-        var resp = response.json.predictions;
-        resp.forEach(el => {
-          console.log(el);
-        })
-        resolve(response);
-        /*
-        expect(response.json.predictions).toEqual(
-            arrayContaining([
-              objectContaining({
-                description: 'pizza near New York, NY, USA'
-              })
-            ]));
+        if(response.json.status == 'OK'){
+          var resultArray = [];
+          var tmpResultArray = response.json.predictions;
+          tmpResultArray.forEach(el => {
+            resultArray.push(el.description);
+          });
+          resolve(resultArray);
+        } else {
+          console.log('error');
+          reject('error');
+        }
+
       })
-      .catch((err) => {
-        console.log(err);
-        reject(err);
+      .catch((error) => {
+        console.log(error);
+        reject(error);
       });
-    });
-  },*/
+    })
+  }
 
 
 

@@ -5,6 +5,18 @@ var googleApi = require('./google_api.js');
 var neo4jFunc = require('../neo4j_func/cities.js');
 var neo4jUser = require('../neo4j_func/user.js');
 
+router.get('/autoCompleteCityName/:name', function(req, res, next) {
+  var name = req.params.name;
+  neo4jFunc.autocompleteNameCity(name)
+  .then(results => {
+    res.send(results);
+  })
+  .catch(error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
+
 router.get('/getCityByName/:name', function(req, res, next) {
   let name = req.params.name;
 
@@ -80,6 +92,8 @@ router.get('/:id', function(req, res, next) {
     res.status(500).send('Error : ' + error);
   });
 });
+
+
 
 /*
 router.get('/google/:id', function(req, res, next) {
