@@ -24,22 +24,13 @@ module.exports = {
             "place_id" : el.properties.place_id,
             "url" : el.properties.url,
             "photos" : photo,
+            "location" : el.properties.location,
             "type" : el.properties.type
           }
           if(el.properties.rating.low)
             activity.rating = el.properties.rating.low;
           else
             activity.rating = el.properties.rating;
-            /*
-          var type = [];
-          if(el.properties.type) {
-            console.log(el.properties.type);
-            var tmp = el.properties.type.split(',');
-            tmp.forEach(t =>{
-              type.push(t);
-            })
-            activity.type = type;
-          }*/
 
           returnValue = activity;
         });
@@ -52,7 +43,7 @@ module.exports = {
       });
     })
   },
-  create: function (adress, name, place_id, rating = -1, types, url, photos, idCity) {
+  create: function (adress, name, place_id, rating = -1, types, url, photos, idCity,location) {
     return new Promise((resolve, reject) => {
       const resultPromise = session.run(
         'Match (c:City) ' +
@@ -64,6 +55,7 @@ module.exports = {
         'rating: ' + rating + ', ' +
         'url: "' + url + '", ' +
         'type : "' + types + '", ' +
+        'location: "' + location + '", ' +
         'photos: "' + photos + '" ' +
         '})<-[:HAS]-(c) Return a',
       );
@@ -82,6 +74,7 @@ module.exports = {
             "place_id" : el.properties.place_id,
             "url" : el.properties.url,
             "photos" : photo,
+            "location" : el.properties.location,
             "type" : el.properties.type
           }
           if(el.properties.rating.low)
@@ -100,7 +93,7 @@ module.exports = {
 
     })
   },
-  createWithoutCity: function (adress, name, place_id, rating = -1, types, url, photos) {
+  createWithoutCity: function (adress, name, place_id, rating = -1, types, url, photos,location) {
     return new Promise((resolve, reject) => {
       const resultPromise = session.run(
         'Create (a:Activity {' +
@@ -110,6 +103,7 @@ module.exports = {
         'rating: ' + rating + ', ' +
         'url: "' + url + '", ' +
         'type : "' + types + '", ' +
+        'location: "' + location + '", ' +
         'photos: "' + photos + '" ' +
         '}) Return a',
       );
@@ -128,6 +122,7 @@ module.exports = {
             "place_id" : el.properties.place_id,
             "url" : el.properties.url,
             "photos" : el.properties.photos,
+            "location" : el.properties.location,
             "type" : el.properties.type
           }
           if(el.properties.rating.low)
@@ -163,7 +158,7 @@ module.exports = {
             googleApi.getDetail(el)
             .then(activityDetail => {
               if(idCity != -1){
-                this.create(activityDetail.address, activityDetail.name, activityDetail.place_id, activityDetail.rating, activityDetail.types, activityDetail.url, activityDetail.photos, idCity)
+                this.create(activityDetail.address, activityDetail.name, activityDetail.place_id, activityDetail.rating, activityDetail.types, activityDetail.url, activityDetail.photos, idCity, activityDetail.location)
                 .then(newActivity => {
                   returnValue.push(newActivity);
                   if (returnValue.length == sizeInput)
@@ -176,7 +171,7 @@ module.exports = {
               } else {
                 var tmpNewCity = activityDetail.city + " " + activityDetail.country;
 
-                this.createWithoutCity(activityDetail.address, activityDetail.name, activityDetail.place_id, activityDetail.rating, activityDetail.types, activityDetail.url, activityDetail.photos)
+                this.createWithoutCity(activityDetail.address, activityDetail.name, activityDetail.place_id, activityDetail.rating, activityDetail.types, activityDetail.url, activityDetail.photos, activityDetail.location)
                 .then(newActivity => {
                   newActivity.city = tmpNewCity;
                   returnValue.push(newActivity);
@@ -228,6 +223,7 @@ module.exports = {
             "rating" : el.properties.rating,
             "url" : el.properties.url,
             "photos" : photo,
+            "location" : el.properties.location,
             "type" : el.properties.types
           }
           returnValue.push(activity);
@@ -262,6 +258,7 @@ module.exports = {
             "rating" : el.properties.rating,
             "url" : el.properties.url,
             "photos" : photo,
+            "location" : el.properties.location,
             "type" : el.properties.types
           }
           returnValue.push(activity);
@@ -274,5 +271,6 @@ module.exports = {
       });
     })
   },
+
 
 };

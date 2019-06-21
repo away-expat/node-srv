@@ -319,8 +319,8 @@ router.delete('/', function(req, res, next) {
   });
 });
 
-router.put('/updateUserCity', function(req, res, next) {
-  var idCity = req.body.idCity;
+router.put('/updateUserCity/:idCity', function(req, res, next) {
+  var idCity = req.params.idCity;
   var id = currentUser.id;
 
   if(idCity){

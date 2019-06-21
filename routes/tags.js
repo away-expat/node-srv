@@ -71,6 +71,30 @@ router.get('/ofUser', function(req, res, next) {
   });
 });
 
+router.get('/autocompleteNameTag/:name', function(req, res, next) {
+  var name = req.params.name;
+  const resultPromise = session.run(
+    'MATCH (n :Tag) Where toLower(n.name) Contains toLower("' + name + '") RETURN n',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      var el = element.get(0);
+      var tag = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+      }
+      returnValue.push(tag);
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
 router.post('/', function(req, res, next) {
   let name = req.body.name;
 
@@ -144,7 +168,7 @@ router.delete('/dislike/:id', function(req, res, next) {
 
   resultPromise.then(result => {
     console.log(result);
-    res.send([]);
+    res.send(result.records);
   }).catch( error => {
     console.log('Error : ' + error);
     res.status(500).send('Error : ' + error);

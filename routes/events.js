@@ -3,6 +3,8 @@ var router = express.Router();
 var session = require('./databaseConnexion.js');
 var apiKey = 
 var neo4jUser = require('../neo4j_func/user.js');
+var neo4jEvent = require('../neo4j_func/event.js');
+var neo4jTag = require('../neo4j_func/tag.js');
 var dateFormat = require('dateformat');
 
 // Auth User
@@ -39,7 +41,9 @@ router.get('/', function(req, res, next) {
       var activity = element.get(1);
       var event = {
         "id" : el.identity.low,
+        "title" : el.properties.title,
         "date" : el.properties.date,
+        "hour" : el.properties.hour,
         "description" : el.properties.description,
         "activityName" : activity.properties.name,
         "activityId" : activity.identity.low,
@@ -68,7 +72,9 @@ router.get('/:id', function(req, res, next) {
       var activity = element.get(1);
       var event = {
         "id" : el.identity.low,
+        "title" : el.properties.title,
         "date" : el.properties.date,
+        "hour" : el.properties.hour,
         "description" : el.properties.description,
         "activityName" : activity.properties.name,
         "activityId" : activity.identity.low,
@@ -88,11 +94,13 @@ router.post('/', function(req, res, next) {
   let idUser = currentUser.id;
   let date = req.body.date;
   let description = req.body.description;
+  let title = req.body.title;
+  let hour = req.body.hour;
 
   const resultPromise = session.run(
     'MATCH (u:User), (a:Activity) '+
     'WHERE ID(u) = ' + idUser + ' AND ID(a) = ' + idActivity + ' ' +
-    'CREATE (u)-[:CREATE]->(n :Event {date:"' + date + '", ' +
+    'CREATE (u)-[:CREATE]->(n :Event {title: "' + title + '", date:"' + date + '", hour:"' + hour + '", ' +
     'description:"' + description + '"})-[:INSTANCE]->(a)'+
     'RETURN n,a',
   );
@@ -105,7 +113,9 @@ router.post('/', function(req, res, next) {
       var activity = element.get(1);
       var evenement = {
         "id" : el.identity.low,
+        "title" : el.properties.title,
         "date" : el.properties.date,
+        "hour" : el.properties.hour,
         "description" : el.properties.description,
         "activityName" : activity.properties.name,
         "activityId" : activity.identity.low,
@@ -125,11 +135,12 @@ router.post('/', function(req, res, next) {
 router.get('/getEventWithDetails/:id', function(req, res, next) {
   let id = req.params.id
   const resultPromise = session.run(
-    'Match (u:User)-[:CREATE]->(e: Event)-[:INSTANCE]->(a:Activity)-[:TYPE]->(t:Tag) Where ID(e) = ' + id + '  Return u,e,a,t'
+    'Match (u:User)-[:CREATE]->(e: Event)-[:INSTANCE]->(a:Activity) Where ID(e) = ' + id + '  Return u,e,a'
   );
 
   resultPromise.then(result => {
     const records = result.records;
+    console.log(records);
     var returnValue = {};
     var u = records[0].get(0);
     var user = {
@@ -141,7 +152,9 @@ router.get('/getEventWithDetails/:id', function(req, res, next) {
     var e = records[0].get(1);
     var event = {
       "id" : e.identity.low,
+      "title" : e.properties.title,
       "date" : e.properties.date,
+      "hour" : el.properties.hour,
       "description" : e.properties.description
     };
 
@@ -153,49 +166,61 @@ router.get('/getEventWithDetails/:id', function(req, res, next) {
       "name" : a.properties.name,
       "address" : a.properties.address,
       "place_id" : a.properties.place_id,
-      "rating" : a.properties.rating,
       "url" : a.properties.url,
       "photos" : photo,
       "type" : a.properties.type
     }
+    if(a.properties.rating.low)
+      activity.rating = a.properties.rating.low;
+    else
+      activity.rating = a.properties.rating;
+
     returnValue.creator = user;
     returnValue.event = event;
     returnValue.activity = activity;
-    returnValue.tag = [];
     returnValue.participant = [];
-    records.forEach(element => {
-      var el = element.get(3);
-      var tag = {
-        "id" : el.identity.low,
-        "name": el.properties.name,
-      }
-      returnValue.tag.push(tag);
-    })
 
-    const resultPromiseUser = session.run(
-      'Match (u:User)-[:TAKEPART]->(e: Event) Where ID(e) = ' + id + '  Return u'
-    );
+    neo4jTag.getTagsOfActivity(activity.id)
+    .then(tagResult => {
+      returnValue.tag = tagResult;
+      const resultPromiseUser = session.run(
+        'Match (u:User)-[:TAKEPART]->(e: Event) Where ID(e) = ' + id + '  Return u'
+      );
 
-    resultPromiseUser.then(users => {
-      const usersArray = users.records;
-      usersArray.forEach(function(element){
-        var el = element.get(0);
-        var user = {
-          "id" : el.identity.low,
-          "firstname" : el.properties.firstname,
-          "lastname" : el.properties.lastname,
-        }
-        returnValue.participant.push(user);
+      resultPromiseUser.then(users => {
+        const usersArray = users.records;
+        usersArray.forEach(function(element){
+          var el = element.get(0);
+          var user = {
+            "id" : el.identity.low,
+            "firstname" : el.properties.firstname,
+            "lastname" : el.properties.lastname,
+          }
+          returnValue.participant.push(user);
+        });
+      })
+      .catch( error => {
+        console.log('Error 3: ' + error);
+        res.status(500).send('Error 3: ' + error);
       });
-    }).catch( error => {
-      console.log('Error : ' + error);
-      res.status(500).send('Error : ' + error);
+
+      neo4jEvent.userSeeEvent(currentUser.id, id)
+      .then()
+      .catch( error => {
+        console.log('See Error 2.1: ' + error);
+      });
+
+      res.send(returnValue);
+    })
+    .catch( error => {
+      console.log('Error 2: ' + error);
+      res.status(500).send('Error 2: ' + error);
     });
 
-    res.send(returnValue);
-  }).catch( error => {
-    console.log('Error : ' + error);
-    res.status(500).send('Error : ' + error);
+  })
+  .catch( error => {
+    console.log('Error 1: ' + error);
+    res.status(500).send('Error 1: ' + error);
   });
 });
 
@@ -213,7 +238,9 @@ router.get('/getEventsByActivity/:id', function(req, res, next) {
       var el = element.get(0);
       var event = {
         "id" : el.identity.low,
+        "title" : el.properties.title,
         "date" : el.properties.date,
+        "hour" : el.properties.hour,
         "description" : el.properties.description
       }
       returnValue.push(event);
@@ -275,7 +302,9 @@ router.post('/postParticipateAtEvent', function(req, res, next) {
           var activity = element.get(1);
           var event = {
             "id" : el.identity.low,
+            "title" : el.properties.title,
             "date" : el.properties.date,
+            "hour" : el.properties.hour,
             "description" : el.properties.description,
             "activityName" : activity.properties.name,
             "activityId" : activity.identity.low,
@@ -326,7 +355,9 @@ router.delete('/deleteParticipationAtEvent', function(req, res, next) {
           var activity = element.get(1);
           var event = {
             "id" : el.identity.low,
+            "title" : el.properties.title,
             "date" : el.properties.date,
+            "hour" : el.properties.hour,
             "description" : el.properties.description,
             "activityName" : activity.properties.name,
             "activityId" : activity.identity.low,
@@ -364,23 +395,6 @@ router.delete('/', function(req, res, next) {
 
   resultPromise.then(result => {
     const records = result.summary;
-    console.log(records);
-    /*
-    var returnValue;
-    records.forEach(function(element){
-      var el = element.get(0);
-      var activity = element.get(1);
-      var event = {
-        "id" : el.identity.low,
-        "date" : el.properties.date,
-        "description" : el.properties.description,
-        "activityName" : activity.properties.name,
-        "activityId" : activity.identity.low,
-      }
-      returnValue = event;
-
-    });*/
-
     res.send([]);
 
   }).catch( error => {

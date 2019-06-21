@@ -17,7 +17,8 @@ module.exports = {
             "name" : el.properties.name,
             "country" : el.properties.country,
             "place_id" : el.properties.place_id,
-            "location" : el.properties.location
+            "location" : el.properties.location,
+            "countryCode" : el.properties.countryCode,
           }
           returnValue = city;
         });
@@ -44,7 +45,8 @@ module.exports = {
             "name" : el.properties.name,
             "country" : el.properties.country,
             "place_id" : el.properties.place_id,
-            "location" : el.properties.location
+            "location" : el.properties.location,
+            "countryCode" : el.properties.countryCode,
           }
           returnValue = city;
         });
@@ -56,14 +58,15 @@ module.exports = {
       });
     })
   },
-  create: function (name, country, place_id, location) {
+  create: function (name, country, place_id, location, countryCode) {
     return new Promise((resolve, reject) => {
       const resultPromise = session.run(
         'Create (c:City {' +
         'name: "' + name + '", ' +
         'country: "' + country + '", ' +
         'place_id: "' + place_id + '", ' +
-        'location: "' + location + '" ' +
+        'location: "' + location + '", ' +
+        'countryCode: "' + countryCode + '" ' +
         '}) Return c',
       );
 
@@ -78,6 +81,7 @@ module.exports = {
             "country" : el.properties.country,
             "place_id" : el.properties.place_id,
             "location" : el.properties.location,
+            "countryCode" : el.properties.countryCode,
           }
 
           returnValue = city;
@@ -98,7 +102,7 @@ module.exports = {
         if(res)
           resolve(res);
         else {
-          this.create(city.name, city.country, city.place_id, city.location)
+          this.create(city.name, city.country, city.place_id, city.location, city.countryCode)
           .then(result => {
             resolve(result);
           }).catch(error => {
@@ -157,7 +161,8 @@ module.exports = {
             "name" : el.properties.name,
             "country" : el.properties.country,
             "place_id" : el.properties.place_id,
-            "location" : el.properties.location
+            "location" : el.properties.location,
+            "countryCode" : el.properties.countryCode,
           }
           returnValue = city;
         });
@@ -188,7 +193,8 @@ module.exports = {
           "name" : el.properties.name,
           "country" : el.properties.country,
           "place_id" : el.properties.place_id,
-          "location" : el.properties.location
+          "location" : el.properties.location,
+          "countryCode" : el.properties.countryCode,
         }
         resolve(city);
       })
@@ -206,7 +212,7 @@ module.exports = {
         var length = resultPrediction.length;
         var resultArray = []
         resultPrediction.forEach(el => {
-          
+
           googleApi.getByName(el)
           .then(reusltDetail => {
 

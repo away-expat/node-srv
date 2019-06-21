@@ -22,6 +22,7 @@
     "passport-google-oauth": "^2.0.0",
     "passport-http": "^0.3.0",
     "passport-oauth": "^1.0.0",
+    "request": "^2.88.0",
     "sha1": "^1.1.1"
   }
 }

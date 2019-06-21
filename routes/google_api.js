@@ -15,23 +15,32 @@ module.exports = {
         .asPromise()
         .then((response) => {
           if(response.json.status == 'OK'){
+
             var placeIdCity = response.json.results[0].place_id;
             let sizeAdressCity = response.json.results[0].address_components.length;
+
             for(i = 0; i < sizeAdressCity; i++){
               let decomposedAdressCity = response.json.results[0].address_components[i].types.length;
-              var nameCity = response.json.results[0].address_components[0].long_name;
+              var nameCity;
               for(j = 0; j < decomposedAdressCity; j++){
-                if(response.json.results[0].address_components[i].types[j] == 'country')
+                if(response.json.results[0].address_components[i].types[j] == 'country'){
                   var countryCity = response.json.results[0].address_components[i].long_name;
+                  var countryCode = response.json.results[0].address_components[i].short_name;
+                }
+                if(response.json.results[0].address_components[i].types[j] == 'locality'){
+                  nameCity = response.json.results[0].address_components[i].long_name;
+                }
               }
             }
+
             var locationCity = [response.json.results[0].geometry.location.lat,response.json.results[0].geometry.location.lng];
 
             var city = {
               "name" : nameCity,
               "country" : countryCity,
               "place_id" : placeIdCity,
-              "location" : locationCity
+              "location" : locationCity,
+              "countryCode" : countryCode
             }
             resolve(city);
           } else {
@@ -62,7 +71,8 @@ module.exports = {
               country = add.long_name;
           })
 
-
+          var loc = detailElement.json.result.geometry.location;
+          var location = [loc.lat, loc.lng];
           var address = detailElement.json.result.formatted_address;
           var name = detailElement.json.result.name;
           var place_id = detailElement.json.result.place_id;
@@ -92,7 +102,8 @@ module.exports = {
             "url" : url,
             "photos" : photos,
             "city" : city,
-            "country" : country
+            "country" : country,
+            "location" : location
           }
 
           resolve(activity);
@@ -224,12 +235,13 @@ module.exports = {
           var resultArray = [];
           var tmpResultArray = response.json.predictions;
           tmpResultArray.forEach(el => {
-            resultArray.push(el.description);
+            if(el.types[0] == 'locality')
+              resultArray.push(el.description);
           });
           resolve(resultArray);
         } else {
-          console.log('error');
-          reject('error');
+          console.log('Error : Status req not ok');
+          reject('Error : Status req not ok');
         }
 
       })
@@ -238,9 +250,23 @@ module.exports = {
         reject(error);
       });
     })
-  }
-
-
+  },
+  testByLocation: function () {
+    return new Promise((resolve, reject) => {
+      googleMaps.reverseGeocode({
+        latlng: [48.482831, 2.173066],
+      })
+      .asPromise()
+      .then(function(response) {
+        console.log(response.json.results[0]);
+        resolve(response);
+      })
+      .catch( error => {
+        console.log(error);
+        reject(error);
+      });
+    })
+  },
 
 
 

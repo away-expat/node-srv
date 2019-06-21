@@ -12,11 +12,7 @@ var neo4jEvent = require('../neo4j_func/event.js');
 var apiKey = 
 
 var dateFormat = require('dateformat');
-
-router.get('/test', function(req, res, next) {
-
-});
-
+const request = require('request');
 
 // Auth User
 var currentUser;
@@ -37,6 +33,44 @@ router.use(function (req, res, next) {
     console.log('Error : ' + error);
     res.status(500).send('Error : ' + error);
   });
+});
+
+router.get('/test', function(req, res, next) {
+  console.log(currentUser);
+  var finalResult = [];
+
+  neo4jEvent.suggestionOne(currentUser.id, currentUser.at.id, 10)
+  .then(result => {
+    console.log(result);
+
+    res.send(finalResult);
+  })
+  .catch(error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+
+
+  /*
+  var result;
+  request('https://etablissements-publics.api.gouv.fr/v1/organismes/91/adil', { json: true }, (err, res, body) => {
+    if (err) { return console.log(err); }
+    result = body.features[0].properties;
+    console.log(result);
+
+  });
+
+  res.send(result);
+  */
+  /*
+  googleApi.testByLocation()
+  .then(result => {
+    res.send([]);
+  })
+  .catch(error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });*/
 });
 
 router.get('/nameRch/:name/:option?', function(req, res, next) {
@@ -110,8 +144,14 @@ router.get('/nameRch/:name/:option?', function(req, res, next) {
         });
 
         res.send(activityArray);
-      } else
-        res.send([]);
+      } else{
+        var returnEmpty = {
+          results : [],
+          token: ""
+        }
+        res.send(returnEmpty);
+      }
+
     })
     .catch(error => {
       console.log('Error 2: ' + error);
@@ -219,8 +259,10 @@ router.get('/clearDataBase', function(req, res, next) {
     console.log(records);
 
     res.send([]);
-  }).catch( error => {
-    console.log(error);
+  })
+  .catch(error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
   });
 });
 
@@ -231,17 +273,6 @@ router.get('/googleByCity/:city/:option?', function(req, res, next) {
 
   if (!option)
     option = '';
-
-  if(option){
-    neo4jTag.userSee(currentUser.id, option)
-    .then(r => {
-      console.log("link see to " + option + " fait !");
-    })
-    .catch( error => {
-      console.log('Error : ' + error);
-      res.status(500).send('Error : ' + error);
-    });
-  }
 
   googleApi.getByName(city)
   .then(result => {
@@ -255,64 +286,96 @@ router.get('/googleByCity/:city/:option?', function(req, res, next) {
         var token = resultActivity.token;
         resultActivity = resultActivity.results;
 
-        neo4jActivity.createIfDoNotExiste(resultActivity, reslt.id)
-        .then(activityArray => {
-
-          var tagArray = [];
-          activityArray.forEach(activity => {
-            if(activity.type){
-              activity.type = activity.type.split(',');
-              activity.type.forEach(tag => {
-                if(tagArray.indexOf(tag) == -1)
-                  tagArray.push(tag);
+        if(resultActivity) {
+          neo4jActivity.createIfDoNotExiste(resultActivity, reslt.id)
+          .then(activityArray => {
+            if(activityArray.length > 0) {
+              var tagArray = [];
+              activityArray.forEach(activity => {
+                if(activity.type){
+                  activity.type = activity.type.split(',');
+                  activity.type.forEach(tag => {
+                    if(tagArray.indexOf(tag) == -1)
+                      tagArray.push(tag);
+                  })
+                }
               })
-            }
-          })
-          neo4jTag.createMultyTag(tagArray)
-          .then(tagResult => {
-            activityArray.forEach(activity => {
-              if(activity.type)
-                tagResult.forEach(tag => {
-                  if(activity.type.indexOf(tag.name) != -1){
+              neo4jTag.createMultyTag(tagArray)
+              .then(tagResult => {
+                activityArray.forEach(activity => {
+                  if(activity.type)
+                    tagResult.forEach(tag => {
+                      if(activity.type.indexOf(tag.name) != -1){
 
-                    neo4jTag.createLink(activity.id, tag.id)
-                    .catch( error => {
-                      console.log('Error : ' + error);
-                      res.status(500).send('Error : ' + error);
-                    });
-                  }
+                        neo4jTag.createLink(activity.id, tag.id)
+                        .catch( error => {
+                          console.log('Error 6: ' + error);
+                          res.status(500).send('Error 6: ' + error);
+                        });
+                      }
+                    })
                 })
-            })
+
+                if(option){
+                  neo4jTag.userSee(currentUser.id, option)
+                  .then(r => {
+                    console.log("link see to " + option + " fait !");
+                  })
+                  .catch( error => {
+                    console.log('Error 7: ' + error);
+                    res.status(500).send('Error 7: ' + error);
+                  });
+                }
+
+              })
+              .catch(error => {
+                console.log('Error 5: ' + error);
+                res.status(500).send('Error 5: ' + error);
+              });
+
+
+
+              var returnValue = {
+                "results" : activityArray,
+                "token" : token
+              }
+
+              res.send(returnValue);
+            } else{
+              var returnEmpty = {
+                results : [],
+                token: ""
+              }
+              res.send(returnEmpty);
+            }
 
           })
           .catch(error => {
-            console.log('Error : ' + error);
-            res.status(500).send('Error : ' + error);
+            console.log('Error 4: ' + error);
+            res.status(500).send('Error 4: ' + error);
           });
-
-          var returnValue = {
-            "results" : activityArray,
-            "token" : token
+        } else{
+          var returnEmpty = {
+            results : [],
+            token: ""
           }
-          res.send(returnValue);
+          res.send(returnEmpty);
+        }
 
-        })
-        .catch(error => {
-          console.log('Error : ' + error);
-          res.status(500).send('Error : ' + error);
-        });
       })
       .catch(error => {
-        console.log('Error : ' + error);
-        res.status(500).send('Error : ' + error);
+        console.log('Error 3: ' + error);
+        res.status(500).send('Error 3: ' + error);
       });
-    }).catch(error => {
-      console.log('Error : ' + error);
-      res.status(500).send('Error : ' + error);
+    })
+    .catch(error => {
+      console.log('Error 2: ' + error);
+      res.status(500).send('Error 2: ' + error);
     });
-  }).catch(error => {
-    console.log('Error : ' + error);
-    res.status(500).send('Error : ' + error);
+  })
+  .catch(error => {
+    console.log('Error 1: ' + error);
+    res.status(500).send('Error 1: ' + error);
   });
 
 });
@@ -405,7 +468,6 @@ router.get('/googleByLocation/:location/:option?', function(req, res, next) {
 router.get('/suggestion', function(req, res, next) {
   neo4jTag.getTags(currentUser.id)
   .then(tags => {
-    console.log(tags);
 
     tags.forEach(tag => {
       var limite = 0;
@@ -436,8 +498,13 @@ router.get('/suggestion', function(req, res, next) {
               limite += 1;
             }
           })
-        } else
-          res.send([]);
+        } else{
+          var returnEmpty = {
+            results : [],
+            token: ""
+          }
+          res.send(returnEmpty);
+        }
 
       })
       .catch(error => {

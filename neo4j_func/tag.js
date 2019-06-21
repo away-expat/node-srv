@@ -214,6 +214,33 @@ module.exports = {
 
     })
   },
+  getTagsOfActivity: function (id) {
+    return new Promise((resolve, reject) => {
+      const resultPromise = session.run(
+        'MATCH (a:Activity)-[:TYPE]->(t:Tag) WHERE ID(a) = ' + id + ' RETURN t',
+      );
+
+      resultPromise.then(result => {
+        const records = result.records;
+        var returnValue = [];
+        if(records.length > 0)
+          records.forEach((element) => {
+            var el = element.get(0);
+            var tag = {
+              "id" : el.identity.low,
+              "name" : el.properties.name,
+            }
+            returnValue.push(tag);
+          });
+
+        resolve(returnValue);
+
+      }).catch( error => {
+        console.log(error);
+        reject(error);
+      });
+    })
+  },
 
 
 };
