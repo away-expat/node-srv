@@ -47,12 +47,14 @@ module.exports = {
         records.forEach((element) => {
           var el = element.get(0);
           var c = element.get(1);
+          var countryCode = "https://www.countryflags.io/" + c.properties.countryCode + "/shiny/64.png";
           var city = {
             "id" : c.identity.low,
             "name" : c.properties.name,
             "country" : c.properties.country,
             "place_id" : c.properties.place_id,
-            "location" : c.properties.location
+            "location" : c.properties.location,
+            "countryCode" : countryCode
           }
           var user = {
             "id" : el.identity.low,

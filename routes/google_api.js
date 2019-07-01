@@ -153,18 +153,21 @@ module.exports = {
   },
   getNextPage: function (token) {
     return new Promise((resolve, reject) => {
-      googleMaps.places({
-        pagetoken: token
-      })
-      .asPromise()
-      .then((response) => {
-        if(response.json.status == 'OK'){
+      var request = require('request');
+      request("https://maps.googleapis.com/maps/api/place/nearbysearch/json?pagetoken=" + token + "&key=AIzaSyB17-DLIRJDd2fZetdqBPByqyQn2n5F7KM", function (error, response, body) {
+        if(response && response.statusCode != 200){
+          console.log(error)
+          reject(error);
+        }
+
+        body = JSON.parse(body);
+        if(body.status == 'OK'){
           var tokenNextPage = "";
-          if(response.json.next_page_token)
-            tokenNextPage = response.json.next_page_token;
+          if(body.next_page_token)
+            tokenNextPage = body.next_page_token;
 
           var returnValueActivities = []
-          response.json.results.forEach(el => {
+          body.results.forEach(el => {
             if(el.types[0] != 'locality' && el.types[0] != 'colloquial_area' && el.types[0] != 'sublocality_level_1'){
               returnValueActivities.push(el.place_id);
             }
@@ -177,10 +180,6 @@ module.exports = {
         } else {
           resolve([]);
         }
-      })
-      .catch((err) => {
-        console.log(err);
-        reject(err);
       });
 
     });
@@ -251,22 +250,7 @@ module.exports = {
       });
     })
   },
-  testByLocation: function () {
-    return new Promise((resolve, reject) => {
-      googleMaps.reverseGeocode({
-        latlng: [48.482831, 2.173066],
-      })
-      .asPromise()
-      .then(function(response) {
-        console.log(response.json.results[0]);
-        resolve(response);
-      })
-      .catch( error => {
-        console.log(error);
-        reject(error);
-      });
-    })
-  },
+
 
 
 

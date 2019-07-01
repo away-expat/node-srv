@@ -14,6 +14,65 @@ var apiKey =
 var dateFormat = require('dateformat');
 const request = require('request');
 
+function uglyName(name){
+  name = name.charAt(0).toLowerCase() + name.slice(1);
+  while(name.indexOf(' ') != -1)
+    name = name.replace(' ', '_');
+  return name;
+}
+
+function addIfNotExiste(finalList, suggestionList){
+  suggestionList.forEach(news => {
+    var existe = 0;
+    finalList.forEach(old =>{
+      if(old.id == news.id)
+        existe++;
+    })
+    if(existe == 0)
+      finalList.push(news);
+  })
+  return finalList;
+}
+
+function sortByDate(events){
+  var change = 0;
+  while(change == 0){
+    change = 0;
+    for(i = 0; i < events.length-1; i++){
+      var a = events[i];
+      var b = events[i+1];
+      var c = new Date(a.date);
+      var d = new Date(b.date);
+      if(c < d){
+        var tmp = a;
+        a = b;
+        b = tmp;
+        change = 1;
+        console.log("changement");
+      }
+    }
+  }
+  return events;
+
+}
+
+router.get('/clearDataBase', function(req, res, next) {
+  const resultPromise = session.run(
+    'Match (a:Event) Detach Delete a',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    console.log(records);
+
+    res.send([]);
+  })
+  .catch(error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
+
 // Auth User
 var currentUser;
 router.use(function (req, res, next) {
@@ -35,128 +94,243 @@ router.use(function (req, res, next) {
   });
 });
 
-router.get('/test', function(req, res, next) {
-  console.log(currentUser);
-  var finalResult = [];
+router.post('/test', function(req, res, next) {
+  let idUser = req.body.id;
+  let idElement = req.body.element;
 
-  neo4jEvent.suggestionOne(currentUser.id, currentUser.at.id, 10)
-  .then(result => {
-    console.log(result);
+  const resultPromise = session.run(
+    'MATCH (u:User), (e) WHERE ID(u) = ' + idUser + ' And ID(e) = ' + idElement +
+    ' Create (u)-[l:SEE]->(e) RETURN e',
+  );
 
-    res.send(finalResult);
-  })
-  .catch(error => {
+  resultPromise.then(result => {
+    const records = result.records;
+
+    res.send(records);
+  }).catch( error => {
     console.log('Error : ' + error);
     res.status(500).send('Error : ' + error);
   });
-
-
-  /*
-  var result;
-  request('https://etablissements-publics.api.gouv.fr/v1/organismes/91/adil', { json: true }, (err, res, body) => {
-    if (err) { return console.log(err); }
-    result = body.features[0].properties;
-    console.log(result);
-
-  });
-
-  res.send(result);
-  */
-  /*
-  googleApi.testByLocation()
-  .then(result => {
-    res.send([]);
-  })
-  .catch(error => {
-    console.log('Error : ' + error);
-    res.status(500).send('Error : ' + error);
-  });*/
 });
 
-router.get('/nameRch/:name/:option?', function(req, res, next) {
+router.post('/testLike', function(req, res, next) {
+  let idUser = req.body.id;
+  let idElement = req.body.element;
+
+  const resultPromise = session.run(
+    'MATCH (u:User), (e) WHERE ID(u) = ' + idUser + ' And ID(e) = ' + idElement +
+    ' Create (u)-[l:LIKE]->(e) RETURN e',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+
+    res.send(records);
+  }).catch( error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
+
+router.get('/recherche/:name/:option?', function(req, res, next) {
   var name = req.params.name;
   var location = currentUser.at.location;
   var option = req.params.option;
 
   if (!option)
     option = '';
+  else
+    option = uglyName(option);
 
   googleApi.rechByName(name, location, option)
   .then(resultActivity => {
+    var nextToken = resultActivity.token;
 
-    neo4jActivity.createIfDoNotExiste(resultActivity.results, -1)
-    .then(activityArray => {
-      if(activityArray){
-        var tagArray = [];
-        var cityArray = [];
+    if(resultActivity.results) {
+      neo4jActivity.createIfDoNotExiste(resultActivity.results, -1)
+      .then(activityArray => {
+        if(activityArray){
+          var tagArray = [];
+          var cityArray = [];
 
-        activityArray.forEach(activity => {
-          if(activity.type){
-            activity.type = activity.type.split(',');
-            activity.type.forEach(tag => {
-              if(tagArray.indexOf(tag) == -1)
-                tagArray.push(tag);
-            })
-          }
-          if(cityArray.indexOf(activity.city) == -1 && activity.city)
-            cityArray.push(activity.city);
-        })
-
-        neo4jTag.createMultyTag(tagArray)
-        .then(tagResult => {
           activityArray.forEach(activity => {
-            if(activity.type)
-              tagResult.forEach(tag => {
-                if(activity.type.indexOf(tag.name) != -1){
+            if(activity.type){
+              activity.type = activity.type.split(',');
+              activity.type.forEach(tag => {
+                if(tagArray.indexOf(tag) == -1)
+                  tagArray.push(tag);
+              })
+            } else {
+              activity.type = [];
+            }
+            if(cityArray.indexOf(activity.city) == -1 && activity.city)
+              cityArray.push(activity.city);
+          })
 
-                  neo4jTag.createLink(activity.id, tag.id)
+          neo4jTag.createMultyTag(tagArray)
+          .then(tagResult => {
+            activityArray.forEach(activity => {
+              if(activity.type)
+                tagResult.forEach(tag => {
+                  if(activity.type.indexOf(tag.name) != -1){
+
+                    neo4jTag.createLink(activity.id, tag.id)
+                    .catch( error => {
+                      console.log('Error 6: ' + error);
+                      res.status(500).send('Error : ' + error);
+                    });
+                  }
+                })
+            })
+          })
+          .catch(error => {
+            console.log('Error 5: ' + error);
+            res.status(500).send('Error : ' + error);
+          });
+          neo4jCity.createMultyCity(cityArray)
+          .then(cityResult => {
+            activityArray.forEach(activity => {
+              cityResult.forEach(city => {
+                tmpCity = city.name + " " + city.country;
+                if(activity.city == tmpCity){
+                  neo4jCity.createLink(activity.id, city.id)
                   .catch( error => {
-                    console.log('Error 6: ' + error);
+                    console.log('Error 4: ' + error);
                     res.status(500).send('Error : ' + error);
                   });
                 }
               })
+            })
+
           })
-        })
-        .catch(error => {
-          console.log('Error 5: ' + error);
-          res.status(500).send('Error : ' + error);
-        });
-        neo4jCity.createMultyCity(cityArray)
-        .then(cityResult => {
+          .catch(error => {
+            console.log('Error 3: ' + error);
+            res.status(500).send('Error : ' + error);
+          });
+
+          var returnValue = {
+            "results" : activityArray,
+            "token" : nextToken
+          }
+
+          res.send(returnValue);
+        } else{
+          var returnEmpty = {
+            results : [],
+            token: ""
+          }
+          res.send(returnEmpty);
+        }
+
+      })
+      .catch(error => {
+        console.log('Error 2: ' + error);
+        res.status(500).send('Error : ' + error);
+      });
+    } else {
+      res.send([]);
+    }
+  })
+  .catch(error => {
+    console.log('Error 1: ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+
+
+});
+
+router.get('/rechercheAngular/:name/:location/:option?', function(req, res, next) {
+
+  var name = req.params.name;
+  var location = req.params.location;
+  var option = req.params.option;
+
+  if (!option)
+    option = '';
+  else
+    option = uglyName(option);
+
+  googleApi.rechByName(name, location, option)
+  .then(resultActivity => {
+    if(resultActivity.results) {
+      neo4jActivity.createIfDoNotExiste(resultActivity.results, -1)
+      .then(activityArray => {
+        if(activityArray){
+          var tagArray = [];
+          var cityArray = [];
+
           activityArray.forEach(activity => {
-            cityResult.forEach(city => {
-              tmpCity = city.name + " " + city.country;
-              if(activity.city == tmpCity){
-                neo4jCity.createLink(activity.id, city.id)
-                .catch( error => {
-                  console.log('Error 4: ' + error);
-                  res.status(500).send('Error : ' + error);
-                });
-              }
+            if(activity.type){
+              activity.type = activity.type.split(',');
+              activity.type.forEach(tag => {
+                if(tagArray.indexOf(tag) == -1)
+                  tagArray.push(tag);
+              })
+            } else {
+              activity.type = [];
+            }
+            if(cityArray.indexOf(activity.city) == -1 && activity.city)
+              cityArray.push(activity.city);
+          })
+
+          neo4jTag.createMultyTag(tagArray)
+          .then(tagResult => {
+            activityArray.forEach(activity => {
+              if(activity.type)
+                tagResult.forEach(tag => {
+                  if(activity.type.indexOf(tag.name) != -1){
+
+                    neo4jTag.createLink(activity.id, tag.id)
+                    .catch( error => {
+                      console.log('Error 6: ' + error);
+                      res.status(500).send('Error : ' + error);
+                    });
+                  }
+                })
             })
           })
+          .catch(error => {
+            console.log('Error 5: ' + error);
+            res.status(500).send('Error : ' + error);
+          });
+          neo4jCity.createMultyCity(cityArray)
+          .then(cityResult => {
+            activityArray.forEach(activity => {
+              cityResult.forEach(city => {
+                tmpCity = city.name + " " + city.country;
+                if(activity.city == tmpCity){
+                  neo4jCity.createLink(activity.id, city.id)
+                  .catch( error => {
+                    console.log('Error 4: ' + error);
+                    res.status(500).send('Error : ' + error);
+                  });
+                }
+              })
+            })
 
-        })
-        .catch(error => {
-          console.log('Error 3: ' + error);
-          res.status(500).send('Error : ' + error);
-        });
+          })
+          .catch(error => {
+            console.log('Error 3: ' + error);
+            res.status(500).send('Error : ' + error);
+          });
 
-        res.send(activityArray);
-      } else{
-        var returnEmpty = {
-          results : [],
-          token: ""
+          res.send(activityArray);
+        } else{
+          var returnEmpty = {
+            results : [],
+            token: ""
+          }
+          res.send(returnEmpty);
         }
-        res.send(returnEmpty);
-      }
 
-    })
-    .catch(error => {
-      console.log('Error 2: ' + error);
-      res.status(500).send('Error : ' + error);
-    });
+      })
+      .catch(error => {
+        console.log('Error 2: ' + error);
+        res.status(500).send('Error : ' + error);
+      });
+    } else {
+      res.send([]);
+    }
   })
   .catch(error => {
     console.log('Error 1: ' + error);
@@ -171,7 +345,7 @@ router.get('/googleGetNextPage/:token', function(req, res, next) {
 
   googleApi.getNextPage(token)
   .then(resultActivity => {
-    var token = resultActivity.token;
+    var nextToken = resultActivity.token;
     resultActivity = resultActivity.results;
 
     neo4jActivity.createIfDoNotExiste(resultActivity, -1)
@@ -186,6 +360,8 @@ router.get('/googleGetNextPage/:token', function(req, res, next) {
             if(tagArray.indexOf(tag) == -1)
               tagArray.push(tag);
           })
+        } else {
+          activity.type = [];
         }
         if(cityArray.indexOf(activity.city) == -1)
           cityArray.push(activity.city);
@@ -200,16 +376,16 @@ router.get('/googleGetNextPage/:token', function(req, res, next) {
 
                 neo4jTag.createLink(activity.id, tag.id)
                 .catch( error => {
-                  console.log('Error : ' + error);
-                  res.status(500).send('Error : ' + error);
+                  console.log('Error 6: ' + error);
+                  res.status(500).send(error);
                 });
               }
             })
         })
       })
       .catch(error => {
-        console.log('Error : ' + error);
-        res.status(500).send('Error : ' + error);
+        console.log('Error 5: ' + error);
+        res.status(500).send(error);
       });
 
       neo4jCity.createMultyCity(cityArray)
@@ -220,50 +396,37 @@ router.get('/googleGetNextPage/:token', function(req, res, next) {
             if(activity.city == tmpCity){
               neo4jCity.createLink(activity.id, city.id)
               .catch( error => {
-                console.log('Error : ' + error);
-                res.status(500).send('Error : ' + error);
+                console.log('Error 4: ' + error);
+                res.status(500).send(error);
               });
             }
           })
         })
-
       })
       .catch(error => {
-        console.log('Error : ' + error);
-        res.status(500).send('Error : ' + error);
+        console.log('Error 3: ' + error);
+        res.status(500).send(error);
       });
 
-      res.send(activityArray);
+      var returnValue = {
+        "results" : activityArray,
+        "token" : nextToken
+      }
+
+      res.send(returnValue);
 
     })
     .catch(error => {
-      console.log('Error : ' + error);
-      res.status(500).send('Error : ' + error);
+      console.log('Error 2: ' + error);
+      res.status(500).send(error);
     });
 
   })
   .catch( error => {
-    console.log('Error : ' + error);
-    res.status(500).send('Error : ' + error);
+    console.log('Error 1: ' + error);
+    res.status(500).send(error);
   });
 
-});
-
-router.get('/clearDataBase', function(req, res, next) {
-  const resultPromise = session.run(
-    'Match (a) Detach Delete a',
-  );
-
-  resultPromise.then(result => {
-    const records = result.records;
-    console.log(records);
-
-    res.send([]);
-  })
-  .catch(error => {
-    console.log('Error : ' + error);
-    res.status(500).send('Error : ' + error);
-  });
 });
 
 router.get('/googleByCity/:city/:option?', function(req, res, next) {
@@ -273,6 +436,8 @@ router.get('/googleByCity/:city/:option?', function(req, res, next) {
 
   if (!option)
     option = '';
+  else
+    option = uglyName(option);
 
   googleApi.getByName(city)
   .then(result => {
@@ -298,6 +463,8 @@ router.get('/googleByCity/:city/:option?', function(req, res, next) {
                     if(tagArray.indexOf(tag) == -1)
                       tagArray.push(tag);
                   })
+                } else {
+                  activity.type = [];
                 }
               })
               neo4jTag.createMultyTag(tagArray)
@@ -332,8 +499,6 @@ router.get('/googleByCity/:city/:option?', function(req, res, next) {
                 console.log('Error 5: ' + error);
                 res.status(500).send('Error 5: ' + error);
               });
-
-
 
               var returnValue = {
                 "results" : activityArray,
@@ -387,6 +552,8 @@ router.get('/googleByLocation/:location/:option?', function(req, res, next) {
 
   if (!option)
     option = '';
+  else
+    option = uglyName(option);
 
   googleApi.getNear(location, option)
   .then(resultActivity => {
@@ -403,6 +570,9 @@ router.get('/googleByLocation/:location/:option?', function(req, res, next) {
             if(tagArray.indexOf(tag) == -1)
               tagArray.push(tag);
           })
+        }
+        else {
+          activity.type = [];
         }
         if(cityArray.indexOf(activity.city) == -1)
           cityArray.push(activity.city);
@@ -466,52 +636,112 @@ router.get('/googleByLocation/:location/:option?', function(req, res, next) {
 });
 
 router.get('/suggestion', function(req, res, next) {
-  neo4jTag.getTags(currentUser.id)
-  .then(tags => {
+  var finalResult = [];
+  var limit = 0;
 
-    tags.forEach(tag => {
-      var limite = 0;
+  neo4jEvent.suggestionThree(currentUser.id, currentUser.at.id, 3)
+  .then(resultSug1 => {
+    //console.log("Suggestion 1");
+    //console.log(resultSug1);
+    finalResult = resultSug1;
 
-      neo4jActivity.getFromCityAndTagWithEvent(currentUser.at.id, tag.id)
-      .then(activities => {
-        if(activities.length > 0){
-          var endLength = activities.length;
-          var eventArray = [];
-          var numberOfEvent = 0;
-          activities.forEach(activity => {
-            if(limite < 5){
-              neo4jEvent.getNextEvent(activity.id)
-              .then(event => {
-                if(event)
-                  eventArray.push(event);
+    limit = 2 + ( 3 - finalResult.length);
+    console.log("Size of 1 : " + finalResult.length);
 
-                numberOfEvent++;
-                if(numberOfEvent == endLength)
-                  res.send(eventArray);
+    neo4jEvent.suggestionFour(currentUser.id, currentUser.at.id, limit)
+    .then(resultSug2 => {
+      finalResult = addIfNotExiste(finalResult, resultSug2);
+      //console.log("Suggestion 2");
+      //console.log(resultSug2);
 
+      limit = 3 + ( 5 - finalResult.length);
+      console.log("Size of 2 : " + finalResult.length);
+
+
+      neo4jEvent.suggestionOne(currentUser.id, currentUser.at.id, limit)
+      .then(resultSug3 => {
+        finalResult = addIfNotExiste(finalResult, resultSug3);
+        //console.log("Suggestion 3");
+        //console.log(resultSug3);
+
+        limit = 2 + ( 8 - finalResult.length);
+        console.log("Size of 3 : " + finalResult.length);
+
+        neo4jEvent.suggestionTwo(currentUser.id, currentUser.at.id, limit)
+        .then(resultSug4 => {
+          finalResult = addIfNotExiste(finalResult, resultSug4);
+          //console.log("Suggestion 4");
+          //console.log(resultSug4);
+
+          limit = 3 + ( 10 - finalResult.length);
+          console.log("Size of 4 : " + finalResult.length);
+
+          neo4jEvent.suggestionSix(currentUser.id, currentUser.at.id, limit)
+          .then(resultSug5 => {
+            finalResult = addIfNotExiste(finalResult, resultSug5);
+            //console.log("Suggestion 5");
+            //console.log(resultSug5);
+
+            limit = 5 + ( 13 - finalResult.length);
+            console.log("Size of 5 : " + finalResult.length);
+
+            neo4jEvent.suggestionFive(currentUser.id, currentUser.at.id, limit)
+            .then(resultSug6 => {
+              finalResult = addIfNotExiste(finalResult, resultSug6);
+              //console.log("Suggestion 6");
+              //console.log(resultSug6);
+
+              finalResult.sort(function(a, b) {
+                  var dateA = new Date(a.date), dateB = new Date(b.date);
+                  return dateA - dateB;
+              });
+
+              neo4jEvent.getPromotedEvent(currentUser.at.id)
+              .then(resultPromotedEvent => {
+
+                if(resultPromotedEvent[0] != null)
+                  finalResult.unshift(resultPromotedEvent[0]);
+
+                if(resultPromotedEvent[1] != null)
+                  finalResult.unshift(resultPromotedEvent[1]);
+
+                res.send(finalResult);
               })
               .catch(error => {
                 console.log('Error : ' + error);
                 res.status(500).send('Error : ' + error);
-              })
+              });
 
-              limite += 1;
-            }
+
+            })
+            .catch(error => {
+              console.log('Error : ' + error);
+              res.status(500).send('Error : ' + error);
+            });
+
           })
-        } else{
-          var returnEmpty = {
-            results : [],
-            token: ""
-          }
-          res.send(returnEmpty);
-        }
+          .catch(error => {
+            console.log('Error : ' + error);
+            res.status(500).send('Error : ' + error);
+          });
+
+        })
+        .catch(error => {
+          console.log('Error : ' + error);
+          res.status(500).send('Error : ' + error);
+        });
 
       })
       .catch(error => {
         console.log('Error : ' + error);
         res.status(500).send('Error : ' + error);
       });
-    }); //forEach
+
+    })
+    .catch(error => {
+      console.log('Error : ' + error);
+      res.status(500).send('Error : ' + error);
+    });
 
   })
   .catch(error => {
@@ -546,8 +776,14 @@ router.get('/ByCity/:id', function(req, res, next) {
     var returnValue = [];
     records.forEach(function(element){
       var el = element.get(0);
-      var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
-      photo += el.properties.photos;
+      var photo;
+      if(el.properties.photos){
+        photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+        photo += el.properties.photos;
+      } else {
+        photo = "http://51.75.122.187:3000/img/noPhoto.jpg";
+      }
+
       var activity = {
         "id" : el.identity.low,
         "name" : el.properties.name,
@@ -578,8 +814,14 @@ router.get('/', function(req, res, next) {
     var returnValue = [];
     records.forEach(function(element){
       var el = element.get(0);
-      var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
-      photo += el.properties.photos;
+      var photo;
+      if(el.properties.photos){
+        photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+        photo += el.properties.photos;
+      } else {
+        photo = "http://51.75.122.187:3000/img/noPhoto.jpg";
+      }
+
       var activity = {
         "id" : el.identity.low,
         "name" : el.properties.name,
@@ -590,6 +832,7 @@ router.get('/', function(req, res, next) {
         "photos" : photo,
         "type" : el.properties.type
       }
+
       returnValue.push(activity);
     });
 
@@ -610,6 +853,14 @@ router.get('/:id', function(req, res, next) {
   resultPromise.then(result => {
     const records = result.records;
     var el = records[0].get(0);
+    var photo;
+    if(el.properties.photos){
+      photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+      photo += el.properties.photos;
+    } else {
+      photo = "http://51.75.122.187:3000/img/noPhoto.jpg";
+    }
+
     var activity = {
       "id" : el.identity.low,
       "name" : el.properties.name,
@@ -617,25 +868,30 @@ router.get('/:id', function(req, res, next) {
       "place_id" : el.properties.place_id,
       "rating" : el.properties.rating,
       "url" : el.properties.url,
-      "photos" : el.properties.photos,
+      "photos" : photo,
       "type" : el.properties.type
     }
+
 
     var t = activity.type.split(',');
     var sizeSeeTag = 0;
 
-    t.forEach(ac => {
-      neo4jTag.userSee(u.id, ac)
-      .then(r => {
-        sizeSeeTag++;
-        if(sizeSeeTag >= t.length)
-          res.send(activity);
-      })
-      .catch( error => {
-        console.log('Error : ' + error);
-        res.status(500).send('Error : ' + error);
+    if(activity.type != ""){
+      t.forEach(ac => {
+        neo4jTag.userSee(currentUser.id, ac)
+        .then(r => {
+          sizeSeeTag++;
+          if(sizeSeeTag >= t.length)
+            res.send(activity);
+        })
+        .catch( error => {
+          console.log('Error : ' + error);
+          res.status(500).send('Error : ' + error);
+        });
       });
-    });
+    } else {
+      activity.type = [];
+    }
 
   })
   .catch( error => {

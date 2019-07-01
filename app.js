@@ -12,7 +12,8 @@ var tagsRouter = require('./routes/tags');
 var followRouter = require('./routes/follow');
 var eventsRouter = require('./routes/events');
 var auth = require('./routes/auth');
-//var auth = require('./auth');
+var infos = require('./routes/infos');
+var cors = require('cors')
 
 var app = express();
 
@@ -26,13 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type , Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    next();
-});
+app.use(cors())
 
 app.use('/', indexRouter);
 app.use('/cities', citiesRouter);
@@ -42,9 +37,12 @@ app.use('/tags', tagsRouter);
 app.use('/follow', followRouter);
 app.use('/events', eventsRouter);
 app.use('/auth', auth);
+app.use('/infos', infos);
+app.use('/img', express.static('img'));
 
 
 
+/*
 var passport = require('passport');
 app.use(passport.initialize());
 app.use(passport.session());
@@ -111,7 +109,7 @@ passport.use('google', new GoogleStrategy({
       });
     }
 ));
-
+*/
 
 
 // catch 404 and forward to error handler

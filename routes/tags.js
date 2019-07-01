@@ -3,9 +3,16 @@ var router = express.Router();
 var session = require('./databaseConnexion.js');
 var neo4jUser = require('../neo4j_func/user.js');
 
+function sweetName(name){
+  name = name.charAt(0).toUpperCase() + name.slice(1);
+  while(name.indexOf('_') != -1)
+    name = name.replace('_', ' ');
+  return name;
+}
+
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
-    'MATCH (n :Tag) RETURN n',
+    'MATCH (n :Tag) RETURN n Order By n.name',
   );
 
   resultPromise.then(result => {
@@ -13,9 +20,10 @@ router.get('/', function(req, res, next) {
     var returnValue = [];
     records.forEach(function(element){
       var el = element.get(0);
+      var name = sweetName(el.properties.name);
       var tag = {
         "id" : el.identity.low,
-        "name" : el.properties.name,
+        "name" : name
       }
       returnValue.push(tag);
     });
@@ -47,10 +55,40 @@ router.use(function (req, res, next) {
   });
 });
 
-router.get('/ofUser', function(req, res, next) {
+router.get('/ofUser/:id', function(req, res, next) {
+  var id = req.params.id;
+  const resultPromise = session.run(
+    'MATCH (n :Tag)<-[:LIKE]-(u:User) Where ID(u) = ' + id + ' RETURN n Order By n.name',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      var el = element.get(0);
+      var name = sweetName(el.properties.name);
+      var tag = {
+        "id" : el.identity.low,
+        "name" : name
+      }
+      returnValue.push(tag);
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log(error);
+  });
+});
+
+router.get('/suggestion', function(req, res, next) {
   var id = currentUser.id;
   const resultPromise = session.run(
-    'MATCH (n :Tag)<-[:LIKE]-(u:User) Where ID(u) = ' + id + ' RETURN n',
+    'MATCH (n :Tag)<-[l:SEE]-(u:User) ' +
+    'With u,n, count(l) as see ' +
+    'Where ID(u) = ' + id +
+    ' And Not (n)<-[:LIKE]-(u) ' +
+    ' And see >= 3 ' +
+    'RETURN n Order By n.name',
   );
 
   resultPromise.then(result => {
@@ -58,9 +96,10 @@ router.get('/ofUser', function(req, res, next) {
     var returnValue = [];
     records.forEach(function(element){
       var el = element.get(0);
+      var name = sweetName(el.properties.name);
       var tag = {
         "id" : el.identity.low,
-        "name" : el.properties.name,
+        "name" : name
       }
       returnValue.push(tag);
     });
@@ -71,10 +110,10 @@ router.get('/ofUser', function(req, res, next) {
   });
 });
 
-router.get('/autocompleteNameTag/:name', function(req, res, next) {
+router.get('/recherche/:name', function(req, res, next) {
   var name = req.params.name;
   const resultPromise = session.run(
-    'MATCH (n :Tag) Where toLower(n.name) Contains toLower("' + name + '") RETURN n',
+    'MATCH (n :Tag) Where toLower(n.name) Contains toLower("' + name + '") RETURN n Order By n.name',
   );
 
   resultPromise.then(result => {
@@ -82,9 +121,10 @@ router.get('/autocompleteNameTag/:name', function(req, res, next) {
     var returnValue = [];
     records.forEach(function(element){
       var el = element.get(0);
+      var name = sweetName(el.properties.name);
       var tag = {
         "id" : el.identity.low,
-        "name" : el.properties.name,
+        "name" : name
       }
       returnValue.push(tag);
     });
@@ -95,6 +135,7 @@ router.get('/autocompleteNameTag/:name', function(req, res, next) {
   });
 });
 
+/*
 router.post('/', function(req, res, next) {
   let name = req.body.name;
 
@@ -107,9 +148,10 @@ router.post('/', function(req, res, next) {
     var returnValue;
     records.forEach(function(element){
       var el = element.get(0);
+      var name = sweetName(el.properties.name);
       var tag = {
         "id" : el.identity.low,
-        "name" : el.properties.name,
+        "name" : name
       }
       returnValue = tag;
     });
@@ -120,19 +162,26 @@ router.post('/', function(req, res, next) {
     res.status(500).send('Error : ' + error);
   });
 });
+*/
 
 router.post('/like/:id', function(req, res, next) {
   let idTag = req.params.id;
   let idUser = currentUser.id;
 
   const resultPromiseCheck = session.run(
-    'Match (u:User)-[l:LIKE]->(t:Tag) Where ID(u) = ' + idUser + ' And ID(t) = ' + idTag + ' Return l'
+    'Match (u:User)-[l:LIKE]->(t:Tag) Where ID(u) = ' + idUser + ' And ID(t) = ' + idTag + ' Return l,t'
   );
 
   resultPromiseCheck.then(resultCheck => {
     const recordsCheck = resultCheck.records.length;
     if(recordsCheck > 0){
-      res.send("Already Existe");
+      const records =  resultCheck.records[0].get(1);
+      var name = sweetName(records.properties.name);
+      var tag = {
+        "id" : records.identity.low,
+        "name" : name
+      }
+      res.send(tag);
     } else {
       const resultPromise = session.run(
         'Match (u:User),(t:Tag) Where ID(u) = ' + idUser + ' And ID(t) = ' + idTag +
@@ -140,10 +189,12 @@ router.post('/like/:id', function(req, res, next) {
       );
 
       resultPromise.then(result => {
-        const records =  result.records[0].get(0);
+        const records = result.records[0].get(0);
+        //console.log(result.records);
+        var name = sweetName(records.properties.name);
         var tag = {
           "id" : records.identity.low,
-          "name" : records.properties.name,
+          "name" : name
         }
         res.send(tag);
 
@@ -163,11 +214,10 @@ router.delete('/dislike/:id', function(req, res, next) {
   let idUser = currentUser.id;
 
   const resultPromise = session.run(
-    'Match (u:User)-[l:LIKE]->(t:Tag) Where ID(u) = ' + idUser + ' And ID(t) = ' + idTag + ' Delete l'
+    'Match (u:User)-[l]->(t:Tag) Where ID(u) = ' + idUser + ' And ID(t) = ' + idTag + ' Delete l'
   );
 
   resultPromise.then(result => {
-    console.log(result);
     res.send(result.records);
   }).catch( error => {
     console.log('Error : ' + error);
@@ -175,5 +225,6 @@ router.delete('/dislike/:id', function(req, res, next) {
   });
 });
 
+// suggestion tag
 
 module.exports = router;

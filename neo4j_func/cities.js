@@ -12,13 +12,14 @@ module.exports = {
         var returnValue;
         records.forEach((element) => {
           var el = element.get(0);
+          var countryCode = "https://www.countryflags.io/" + el.properties.countryCode + "/shiny/64.png";
           var city = {
             "id" : el.identity.low,
             "name" : el.properties.name,
             "country" : el.properties.country,
             "place_id" : el.properties.place_id,
             "location" : el.properties.location,
-            "countryCode" : el.properties.countryCode,
+            "countryCode" : countryCode,
           }
           returnValue = city;
         });
@@ -40,13 +41,14 @@ module.exports = {
         var returnValue;
         records.forEach((element) => {
           var el = element.get(0);
+          var countryCode = "https://www.countryflags.io/" + el.properties.countryCode + "/shiny/64.png";
           var city = {
             "id" : el.identity.low,
             "name" : el.properties.name,
             "country" : el.properties.country,
             "place_id" : el.properties.place_id,
             "location" : el.properties.location,
-            "countryCode" : el.properties.countryCode,
+            "countryCode" :countryCode,
           }
           returnValue = city;
         });
@@ -75,13 +77,14 @@ module.exports = {
         var returnValue;
         records.forEach(function(element){
           var el = element.get(0);
+          var countryCode = "https://www.countryflags.io/" + el.properties.countryCode + "/shiny/64.png";
           var city = {
             "id" : el.identity.low,
             "name" : el.properties.name,
             "country" : el.properties.country,
             "place_id" : el.properties.place_id,
             "location" : el.properties.location,
-            "countryCode" : el.properties.countryCode,
+            "countryCode" : countryCode,
           }
 
           returnValue = city;
@@ -156,13 +159,14 @@ module.exports = {
         var returnValue;
         records.forEach((element) => {
           var el = element.get(0);
+          var countryCode = "https://www.countryflags.io/" + el.properties.countryCode + "/shiny/64.png";
           var city = {
             "id" : el.identity.low,
             "name" : el.properties.name,
             "country" : el.properties.country,
             "place_id" : el.properties.place_id,
             "location" : el.properties.location,
-            "countryCode" : el.properties.countryCode,
+            "countryCode" : countryCode,
           }
           returnValue = city;
         });
@@ -188,13 +192,14 @@ module.exports = {
       resultPromise.then(result => {
         const records = result.records;
         var el = records[0].get(0);
+        var countryCode = "https://www.countryflags.io/" + el.properties.countryCode + "/shiny/64.png";
         var city = {
           "id" : el.identity.low,
           "name" : el.properties.name,
           "country" : el.properties.country,
           "place_id" : el.properties.place_id,
           "location" : el.properties.location,
-          "countryCode" : el.properties.countryCode,
+          "countryCode" : countryCode,
         }
         resolve(city);
       })

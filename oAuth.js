@@ -1,6 +1,4 @@
 var id = {
-    google: {
-
-};
+    google:
 
 module.exports = id;

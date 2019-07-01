@@ -3,6 +3,12 @@ var googleApi = require('../routes/google_api.js');
 var neo4jTag = require('./tag.js');
 var apiKey = 
 
+function takeOffSimpleCote(name){
+  while(name.indexOf('"') != -1)
+      name = name.replace('"', "'");
+  return name;
+}
+
 module.exports = {
   getByGoogleId: function (id) {
     return new Promise((resolve, reject) => {
@@ -15,8 +21,14 @@ module.exports = {
         var returnValue;
         records.forEach((element) => {
           var el = element.get(0);
-          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
-          photo += el.properties.photos;
+          var photo;
+          if(el.properties.photos){
+            photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+            photo += el.properties.photos;
+          } else {
+            photo = "http://51.75.122.187:3000/img/noPhoto.jpg";
+          }
+
           var activity = {
             "id" : el.identity.low,
             "name" : el.properties.name,
@@ -45,12 +57,13 @@ module.exports = {
   },
   create: function (adress, name, place_id, rating = -1, types, url, photos, idCity,location) {
     return new Promise((resolve, reject) => {
+      name = takeOffSimpleCote(name);
       const resultPromise = session.run(
         'Match (c:City) ' +
         'WHERE ID(c)= ' + idCity + ' ' +
         'Create (a:Activity {' +
         'address: "' + adress + '", ' +
-        'name: "' + name + '", ' +
+        'name: "'+ name + '", ' +
         'place_id: "' + place_id + '", ' +
         'rating: ' + rating + ', ' +
         'url: "' + url + '", ' +
@@ -65,8 +78,14 @@ module.exports = {
         var returnValue;
         records.forEach(function(element){
           var el = element.get(0);
-          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
-          photo += el.properties.photos;
+          var photo;
+          if(el.properties.photos){
+            photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+            photo += el.properties.photos;
+          } else {
+            photo = "http://51.75.122.187:3000/img/noPhoto.jpg";
+          }
+
           var activity = {
             "id" : el.identity.low,
             "name" : el.properties.name,
@@ -95,10 +114,11 @@ module.exports = {
   },
   createWithoutCity: function (adress, name, place_id, rating = -1, types, url, photos,location) {
     return new Promise((resolve, reject) => {
+      name = takeOffSimpleCote(name);
       const resultPromise = session.run(
         'Create (a:Activity {' +
         'address: "' + adress + '", ' +
-        'name: "' + name + '", ' +
+        'name: "'+ name + '", ' +
         'place_id: "' + place_id + '", ' +
         'rating: ' + rating + ', ' +
         'url: "' + url + '", ' +
@@ -113,15 +133,21 @@ module.exports = {
         var returnValue;
         records.forEach(function(element){
           var el = element.get(0);
-          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
-          photo += el.properties.photos;
+          var photo;
+          if(el.properties.photos){
+            photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+            photo += el.properties.photos;
+          } else {
+            photo = "http://51.75.122.187:3000/img/noPhoto.jpg";
+          }
+
           var activity = {
             "id" : el.identity.low,
             "name" : el.properties.name,
             "address" : el.properties.address,
             "place_id" : el.properties.place_id,
             "url" : el.properties.url,
-            "photos" : el.properties.photos,
+            "photos" : photo,
             "location" : el.properties.location,
             "type" : el.properties.type
           }
@@ -165,6 +191,7 @@ module.exports = {
                      resolve(returnValue);
                 })
                 .catch(error => {
+                  console.log("Error createIfDoNotExiste 4");
                   console.log(error);
                   reject(error);
                 });
@@ -179,6 +206,7 @@ module.exports = {
                      resolve(returnValue);
                 })
                 .catch(error => {
+                  console.log("Error createIfDoNotExiste 3");
                   console.log(error);
                   reject(error);
                 });
@@ -187,6 +215,7 @@ module.exports = {
 
             })
             .catch(error => {
+              console.log("Error createIfDoNotExiste 2");
               console.log(error);
               reject(error);
             });
@@ -194,6 +223,7 @@ module.exports = {
           }
         })
         .catch(error => {
+          console.log("Error createIfDoNotExiste 1");
           console.log(error);
           reject(error);
         });
@@ -213,8 +243,14 @@ module.exports = {
         var returnValue = [];
         records.forEach((element) => {
           var el = element.get(0);
-          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
-          photo += el.properties.photos;
+          var photo;
+          if(el.properties.photos){
+            photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+            photo += el.properties.photos;
+          } else {
+            photo = "http://51.75.122.187:3000/img/noPhoto.jpg";
+          }
+
           var activity = {
             "id" : el.identity.low,
             "name" : el.properties.name,
@@ -248,8 +284,14 @@ module.exports = {
         var returnValue = [];
         records.forEach((element) => {
           var el = element.get(0);
-          var photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
-          photo += el.properties.photos;
+          var photo;
+          if(el.properties.photos){
+            photo = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key="+apiKey+"&photoreference=";
+            photo += el.properties.photos;
+          } else {
+            photo = "http://51.75.122.187:3000/img/noPhoto.jpg";
+          }
+
           var activity = {
             "id" : el.identity.low,
             "name" : el.properties.name,

@@ -37,6 +37,61 @@ router.get('/getCityByName/:name', function(req, res, next) {
   });
 });
 
+router.get('/suggestion', function(req, res, next) {
+  const resultPromise = session.run(
+    'Match (c:City)<-[l:AT]-(:User) ' +
+    'With c, count(l) as popularity ' +
+    'Return c Order By popularity Limit 10',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+    records.forEach(function(element){
+      var el = element.get(0);
+      var countryCode = "https://www.countryflags.io/" + el.properties.countryCode + "/shiny/64.png";
+      var city = {
+        "id" : el.identity.low,
+        "name" : el.properties.name,
+        "country" : el.properties.country,
+        "place_id" : el.properties.place_id,
+        "location" : el.properties.location,
+        "countryCode" : countryCode
+      }
+
+      returnValue.push(city);
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
+
+router.get('/allCountry', function(req, res, next) {
+  const resultPromise = session.run(
+    'Match (c:City) Return c Order By c.name',
+  );
+
+  resultPromise.then(result => {
+    const records = result.records;
+    var returnValue = [];
+
+    records.forEach(function(element){
+      var el = element.get(0);
+      var country = el.properties.country;
+      if(returnValue.indexOf(country) == -1 && country != "undefined")
+        returnValue.push(country);
+    });
+
+    res.send(returnValue);
+  }).catch( error => {
+    console.log('Error : ' + error);
+    res.status(500).send('Error : ' + error);
+  });
+});
+
 router.get('/', function(req, res, next) {
   const resultPromise = session.run(
     'Match (c:City) Return c',
@@ -47,12 +102,14 @@ router.get('/', function(req, res, next) {
     var returnValue = [];
     records.forEach(function(element){
       var el = element.get(0);
+      var countryCode = "https://www.countryflags.io/" + el.properties.countryCode + "/shiny/64.png";
       var city = {
         "id" : el.identity.low,
         "name" : el.properties.name,
         "country" : el.properties.country,
         "place_id" : el.properties.place_id,
-        "location" : el.properties.location
+        "location" : el.properties.location,
+        "countryCode" : countryCode
       }
       returnValue.push(city);
     });
@@ -75,12 +132,14 @@ router.get('/:id', function(req, res, next) {
     var returnValue;
     records.forEach(function(element){
       var el = element.get(0);
+      var countryCode = "https://www.countryflags.io/" + el.properties.countryCode + "/shiny/64.png";
       var city = {
         "id" : el.identity.low,
         "name" : el.properties.name,
         "country" : el.properties.country,
         "place_id" : el.properties.place_id,
-        "location" : el.properties.location
+        "location" : el.properties.location,
+        "countryCode" : countryCode
       }
 
       returnValue = city;
